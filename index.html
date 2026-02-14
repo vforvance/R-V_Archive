@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Be My Valentine?</title>
     <link rel="stylesheet" href="https://unpkg.com/98.css">
-    <link rel="stylesheet" href="Website/style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body id="desktop-bg">
 
@@ -32,11 +32,11 @@
 
                     <div id="user-selection" style="width:100%; display:flex; gap:12px; justify-content:center;">
                         <div class="user-tile" data-user="Venance">
-                            <img src="Website/Artifacts/Venance.png" alt="Venance">
+                            <img src="/Website/Artifacts/Venance.png" alt="Venance">
                             <span>Venance</span>
                         </div>
                         <div class="user-tile" data-user="Rehema">
-                            <img src="Website/Artifacts/Rehema.png" alt="Rehema">
+                            <img src="/Website/Artifacts/Rehema.png" alt="Rehema">
                             <span>Rehema</span>
                         </div>
                     </div>
@@ -104,7 +104,7 @@
             <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('photos-window')"></button></div>
         </div>
         <div class="window-body">
-            <img id="current-photo" src="Website/Artifacts/Gemini_Generated_Image_5jaj355jaj355jaj.png" style="width:100%; border: 2px inset #fff;">
+            <img id="current-photo" src="/Website/Artifacts/Gemini_Generated_Image_5jaj355jaj355jaj.png" style="width:100%; border: 2px inset #fff;">
             <div class="field-row" style="justify-content: center; margin-top: 5px;">
                 <button onclick="changePhoto(-1)">Back</button>
                 <button onclick="changePhoto(1)">Next</button>
@@ -144,7 +144,7 @@
         </div>
     </div>
 
-    <div id="video-window" class="window draggable" style="display: none; top: 15%; left: 40%;"><div class="title-bar"><div class="title-bar-text">Media Player</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('video-window')"></button></div></div><div class="window-body"><video width="100%" controls><source src="./Website/assets/video.mp4" type="video/mp4"></video></div></div>
+    <div id="video-window" class="window draggable" style="display: none; top: 15%; left: 40%;"><div class="title-bar"><div class="title-bar-text">Media Player</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('video-window')"></button></div></div><div class="window-body"><video width="100%" controls><source src="/Website/assets/video.mp4" type="video/mp4"></video></div></div>
     <div id="poetry-window" class="window draggable" style="display: none; top: 20%; left: 20%;"><div class="title-bar"><div class="title-bar-text">Notepad</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('poetry-window')"></button></div></div><div class="window-body"><textarea style="width: 100%; height: 200px; resize: none; background: white;">Happy Valentine's Day!</textarea></div></div>
 
     <div class="taskbar">
@@ -155,6 +155,6 @@
         <div class="time-box" id="clock">12:00 PM</div>
     </div>
 
-    <script src="Website/script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
