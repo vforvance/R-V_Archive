@@ -1,6 +1,5 @@
-// --- 1. CORE WINDOW CONTROLS ---
+// --- 1. CORE FUNCTIONS ---
 function openWindow(id) {
-    console.log("Opening:", id);
     const win = document.getElementById(id);
     if (win) {
         win.style.display = 'block';
@@ -14,31 +13,26 @@ function closeWindow(id) {
 }
 
 function toggleStartMenu() {
-    const m = document.getElementById('start-menu');
-    m.style.display = (m.style.display === 'none' || m.style.display === '') ? 'flex' : 'none';
+    const menu = document.getElementById('start-menu');
+    if (menu) {
+        menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'flex' : 'none';
+    }
 }
 
 function bringToFront(id) {
-    const items = document.querySelectorAll('.window, .sticky-note');
-    items.forEach(i => i.style.zIndex = "10");
-    const target = document.getElementById(id);
-    if (target) target.style.zIndex = "100";
+    const all = document.querySelectorAll('.window, .sticky-note');
+    all.forEach(el => el.style.zIndex = "10");
+    const active = document.getElementById(id);
+    if (active) active.style.zIndex = "100";
 }
-
-// Close Start Menu if clicking desktop
-document.addEventListener('click', (e) => {
-    const menu = document.getElementById('start-menu');
-    const startBtn = document.querySelector('.start-button');
-    if (menu.style.display === 'flex' && !menu.contains(e.target) && !startBtn.contains(e.target)) {
-        menu.style.display = 'none';
-    }
-});
 
 // --- 2. DRAGGABLE LOGIC ---
 function makeDraggable(el) {
     let p1 = 0, p2 = 0, p3 = 0, p4 = 0;
     const header = el.querySelector(".title-bar") || el.querySelector(".sticky-header");
     
+    if (!header) return;
+
     header.onmousedown = (e) => {
         if (e.target.tagName === 'BUTTON') return;
         e.preventDefault();
@@ -60,28 +54,21 @@ function makeDraggable(el) {
     };
 }
 
-// --- 3. PHOTO GALLERY ---
-const photoList = [
-    "Gemini_Generated_Image_5jaj355jaj355jaj.png", 
-    "https://win98icons.alexmeub.com/icons/png/joy-0.png",
-    "https://win98icons.alexmeub.com/icons/png/msagent-2.png"
-];
+// --- 3. GALLERY & BG ---
+const photoList = ["Gemini_Generated_Image_5jaj355jaj355jaj.png"]; // Add more later
 let photoIdx = 0;
-
 function changePhoto(n) {
     photoIdx = (photoIdx + n + photoList.length) % photoList.length;
     document.getElementById('current-photo').src = photoList[photoIdx];
 }
 
-// --- 4. WALLPAPER & STICKY NOTES ---
 function uploadBackground(e) {
-    const file = e.target.files[0];
     const reader = new FileReader();
     reader.onload = () => {
         document.body.style.backgroundImage = `url(${reader.result})`;
         localStorage.setItem('os-bg', reader.result);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(e.target.files[0]);
 }
 
 function resetBackground() {
@@ -89,15 +76,14 @@ function resetBackground() {
     localStorage.removeItem('os-bg');
 }
 
+// --- 4. STICKY NOTES ---
 function createStickyNote(text = "", t = "100px", l = "100px") {
     const id = "note-" + Date.now();
     const note = document.createElement('div');
     note.className = 'sticky-note';
     note.id = id;
     note.style.top = t; note.style.left = l;
-    note.innerHTML = `
-        <div class="sticky-header"><span class="close-note" onclick="this.closest('.sticky-note').remove(); saveNotes();">X</span></div>
-        <textarea oninput="saveNotes()">${text}</textarea>`;
+    note.innerHTML = `<div class="sticky-header" onclick="bringToFront('${id}')"><span style="float:right;cursor:pointer;padding:2px;" onclick="this.closest('.sticky-note').remove();saveNotes();">X</span></div><textarea oninput="saveNotes()">${text}</textarea>`;
     document.body.appendChild(note);
     makeDraggable(note);
 }
@@ -110,9 +96,9 @@ function saveNotes() {
     localStorage.setItem('os-notes', JSON.stringify(notes));
 }
 
-// --- 5. INITIALIZATION ---
-window.onload = () => {
-    // Make windows draggable
+// --- 5. INIT ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Set Draggables
     document.querySelectorAll('.window').forEach(makeDraggable);
     
     // Load Wallpaper
@@ -125,6 +111,7 @@ window.onload = () => {
 
     // Clock
     setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const c = document.getElementById('clock');
+        if (c) c.innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     }, 1000);
-};
+});
