@@ -8,20 +8,40 @@ function closeWindow(id) {
     document.getElementById(id).style.display = 'none';
 }
 
+// 2. TOGGLE START MENU
+function toggleStartMenu() {
+    const menu = document.getElementById('start-menu');
+    if (menu.style.display === 'none') {
+        menu.style.display = 'flex';
+        bringToFront('start-menu'); // Ensure it pops over windows
+    } else {
+        menu.style.display = 'none';
+    }
+}
+
+// Close Start Menu if clicking elsewhere
+document.addEventListener('click', function(event) {
+    const menu = document.getElementById('start-menu');
+    const startBtn = document.querySelector('.start-button');
+    if (!menu.contains(event.target) && !startBtn.contains(event.target)) {
+        menu.style.display = 'none';
+    }
+});
+
+
 function bringToFront(id) {
     const windows = document.querySelectorAll('.window');
     windows.forEach(w => w.style.zIndex = 10);
-    document.getElementById(id).style.zIndex = 20;
+    const element = document.getElementById(id);
+    if(element) element.style.zIndex = 20;
 }
 
-// 2. DRAGGABLE WINDOWS LOGIC
+// 3. DRAGGABLE WINDOWS LOGIC
 const windows = document.querySelectorAll('.window');
-
 windows.forEach(dragElement);
 
 function dragElement(elmnt) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  // Move from the title bar
   const header = elmnt.querySelector(".title-bar");
   if (header) {
     header.onmousedown = dragMouseDown;
@@ -34,7 +54,7 @@ function dragElement(elmnt) {
     pos4 = e.clientY;
     document.onmouseup = closeDragElement;
     document.onmousemove = elementDrag;
-    bringToFront(elmnt.id); // Click to focus
+    bringToFront(elmnt.id);
   }
 
   function elementDrag(e) {
@@ -54,7 +74,7 @@ function dragElement(elmnt) {
   }
 }
 
-// 3. CLOCK
+// 4. CLOCK
 function updateTime() {
     const now = new Date();
     document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
