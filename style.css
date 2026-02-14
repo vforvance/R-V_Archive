@@ -2,105 +2,116 @@ body {
     background-color: #ffb7b2;
     background-size: cover;
     background-position: center;
-    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     height: 100vh;
     width: 100vw;
-    overflow: hidden; /* Prevents scrolling */
-    display: flex;
-    flex-direction: column;
+    overflow: hidden; /* Critical for keeping taskbar at bottom */
+    font-family: Arial, sans-serif;
 }
 
 #desktop {
-    flex-grow: 1; /* Takes up all space above taskbar */
+    width: 100%;
+    height: calc(100vh - 30px);
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 25px;
     flex-wrap: wrap;
+    gap: 20px;
     align-content: flex-start;
 }
 
 .icon {
-    width: 75px;
+    width: 80px;
     text-align: center;
     cursor: pointer;
     color: white;
-    text-shadow: 1px 1px 2px black;
-    font-size: 12px;
+    text-shadow: 1px 1px black;
 }
 
-.icon img {
-    width: 32px;
-    height: 32px;
-    display: block;
-    margin: 0 auto 5px;
-}
+.icon img { width: 32px; height: 32px; margin-bottom: 5px; }
 
-/* TASKBAR PROPORTIONS */
+/* TASKBAR FIXED AT BOTTOM */
 .taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     height: 30px;
     background: #c0c0c0;
-    border-top: 2px solid #ffffff;
+    border-top: 2px solid #fff;
     display: flex;
     align-items: center;
-    padding: 2px;
+    padding: 2px 5px;
     box-sizing: border-box;
     z-index: 9999;
 }
 
 .start-button {
     height: 22px;
-    padding: 0 5px;
     display: flex;
     align-items: center;
-    font-weight: bold;
     border: 2px outset #fff;
     background: #c0c0c0;
+    font-weight: bold;
     cursor: pointer;
-    gap: 4px;
 }
 
-.start-button:active {
-    border: 2px inset #fff;
-}
+.start-button:active { border: 2px inset #fff; }
 
 .time-box {
     margin-left: auto;
-    border: 2px inset #ffffff;
-    padding: 0 10px;
-    height: 20px;
-    display: flex;
-    align-items: center;
+    border: 2px inset #fff;
+    padding: 2px 8px;
     font-size: 12px;
     background: #c0c0c0;
+}
+
+/* STICKY NOTES */
+.sticky-note {
+    position: absolute;
+    width: 160px;
+    background: #ffffa5;
+    border: 1px solid #d4d400;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    z-index: 100;
+}
+
+.sticky-header {
+    height: 15px;
+    background: #e6e600;
+    cursor: move;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.close-note { cursor: pointer; padding-right: 3px; font-size: 10px; }
+
+.sticky-note textarea {
+    width: 100%;
+    height: 100px;
+    background: transparent;
+    border: none;
+    resize: none;
+    font-family: 'Comic Sans MS', cursive;
+    padding: 5px;
+    box-sizing: border-box;
 }
 
 /* START MENU */
 .start-menu {
     position: fixed;
-    bottom: 30px; /* Sits exactly on top of taskbar */
+    bottom: 30px;
     left: 2px;
     width: 180px;
     background: #c0c0c0;
     border: 2px outset #fff;
+    display: flex;
     z-index: 10000;
-    display: flex;
 }
 
-.sidebar {
-    width: 25px;
-    background: linear-gradient(to bottom, #000080, #1084d0);
-    color: white;
-    display: flex;
-    align-items: flex-end;
-    padding-bottom: 10px;
-}
-
-.vertical-text {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    font-weight: bold;
-    font-size: 14px;
-}
+.sidebar { width: 25px; background: #800000; color: white; display: flex; align-items: flex-end; padding: 5px; }
+.vertical-text { writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; }
+.menu-items { flex-grow: 1; padding: 2px; }
+.menu-item { padding: 5px; display: flex; align-items: center; cursor: pointer; }
+.menu-item:hover { background: #000080; color: white; }
