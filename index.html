@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body id="desktop-bg">
 
     <div id="desktop">
         <div class="icon" ondblclick="openWindow('music-window')">
@@ -26,91 +26,77 @@
             <img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png" alt="Poetry">
             <span>Love_Letter.txt</span>
         </div>
+        <div class="icon" ondblclick="createStickyNote()">
+            <img src="https://win98icons.alexmeub.com/icons/png/note-0.png" alt="Note">
+            <span>New Note</span>
+        </div>
+        <div class="icon" ondblclick="openWindow('rain-window')">
+            <img src="https://win98icons.alexmeub.com/icons/png/world-2.png" alt="Rain">
+            <span>Rainy Mood</span>
+        </div>
     </div>
 
     <div id="start-menu" class="start-menu" style="display: none;">
-        <div class="sidebar">
-            <span class="vertical-text">LoveOS 98</span>
-        </div>
+        <div class="sidebar"><span class="vertical-text">LoveOS 98</span></div>
         <div class="menu-items">
-            <div class="menu-item" onclick="openWindow('music-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png"> Playlist
-            </div>
-            <div class="menu-item" onclick="openWindow('photos-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/camera3-2.png"> Photos
-            </div>
-            <div class="menu-item" onclick="openWindow('video-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/film_strip-0.png"> Videos
-            </div>
-            <div class="menu-item" onclick="openWindow('poetry-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png"> Poetry
-            </div>
+            <div class="menu-item" onclick="openWindow('music-window'); toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png"> Playlist</div>
+            <div class="menu-item" onclick="openWindow('settings-window'); toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/settings_gear-0.png"> Settings</div>
             <div class="divider"></div>
-            <div class="menu-item" onclick="alert('I love you!')">
-                <img src="https://win98icons.alexmeub.com/icons/png/key_padlock-0.png"> Log Off
-            </div>
+            <div class="menu-item" onclick="alert('I love you!')"><img src="https://win98icons.alexmeub.com/icons/png/key_padlock-0.png"> Log Off</div>
         </div>
     </div>
 
     <div id="photos-window" class="window draggable" style="display: none; top: 10%; left: 10%;">
         <div class="title-bar">
             <div class="title-bar-text">Photo Viewer</div>
-            <div class="title-bar-controls">
-                <button aria-label="Close" onclick="closeWindow('photos-window')"></button>
-            </div>
+            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('photos-window')"></button></div>
         </div>
         <div class="window-body">
-            <img src="Gemini_Generated_Image_5jaj355jaj355jaj.png" alt="Insert Photo Here" style="width:100%; border: 2px inset #fff;">
-            <p style="text-align:center">Best Day Ever ❤️</p>
+            <div class="photo-container">
+                <img id="current-photo" src="Gemini_Generated_Image_5jaj355jaj355jaj.png" style="width:100%; height: 200px; object-fit: cover; border: 2px inset #fff;">
+            </div>
+            <div class="field-row" style="justify-content: center; margin-top: 10px;">
+                <button onclick="changePhoto(-1)">Back</button>
+                <button onclick="changePhoto(1)">Next</button>
+            </div>
         </div>
     </div>
 
-    <div id="video-window" class="window draggable" style="display: none; top: 15%; left: 40%;">
+    <div id="music-window" class="window draggable" style="display: none; top: 30%; left: 30%;">
         <div class="title-bar">
-            <div class="title-bar-text">Media Player</div>
-            <div class="title-bar-controls">
-                <button aria-label="Close" onclick="closeWindow('video-window')"></button>
-            </div>
+            <div class="title-bar-text">Winamp - Spotify</div>
+            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('music-window')"></button></div>
         </div>
         <div class="window-body">
-            <video width="100%" controls>
-                <source src="./assets/video.mp4" type="video/mp4">
-                Video not found.
-            </video>
+            <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/YOUR_PLAYLIST_ID_HERE?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
         </div>
     </div>
 
-    <div id="poetry-window" class="window draggable" style="display: none; top: 20%; left: 20%;">
+    <div id="rain-window" class="window draggable" style="display: none; top: 5%; left: 50%;">
         <div class="title-bar">
-            <div class="title-bar-text">Notepad</div>
-            <div class="title-bar-controls">
-                <button aria-label="Close" onclick="closeWindow('poetry-window')"></button>
-            </div>
+            <div class="title-bar-text">Rainy Mood</div>
+            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('rain-window')"></button></div>
         </div>
         <div class="window-body">
-            <textarea style="width: 100%; height: 200px; resize: none; border: none; outline: none; background: white;">
-Happy Valentine's Day!
-
-(Write your real poem here...)
-            </textarea>
+            <iframe src="https://rainymood.com/" width="300" height="400"></iframe>
         </div>
     </div>
-    
-     <div id="music-window" class="window draggable" style="display: none; top: 30%; left: 30%;">
+
+    <div id="settings-window" class="window draggable" style="display: none; top: 40%; left: 10%;">
         <div class="title-bar">
-            <div class="title-bar-text">Winamp</div>
-            <div class="title-bar-controls">
-                <button aria-label="Close" onclick="closeWindow('music-window')"></button>
-            </div>
+            <div class="title-bar-text">Display Settings</div>
+            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('settings-window')"></button></div>
         </div>
         <div class="window-body">
-             <p>Loading Playlist...</p>
+            <p>Select Wallpaper:</p>
+            <input type="file" id="bg-upload" accept="image/*" onchange="uploadBackground(event)">
+            <button onclick="resetBackground()" style="margin-top:10px">Reset to Pink</button>
         </div>
     </div>
 
     <div class="taskbar">
         <button class="start-button" onclick="toggleStartMenu()">
-            <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" alt="Win">
+            <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png">
             <b>Start ❤️</b>
         </button>
         <div class="time-box" id="clock">12:00 PM</div>
