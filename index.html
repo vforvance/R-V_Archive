@@ -46,8 +46,8 @@
                 <img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png"> Poetry
             </div>
             <div class="divider"></div>
-            <div class="menu-item" onclick="alert('Shutting down... just kidding, never leaving you.')">
-                <img src="https://win98icons.alexmeub.com/icons/png/shut_down_cool-4.png"> Shut Down
+            <div class="menu-item" onclick="alert('I love you!')">
+                <img src="https://win98icons.alexmeub.com/icons/png/key_padlock-0.png"> Log Off
             </div>
         </div>
     </div>
@@ -60,7 +60,7 @@
             </div>
         </div>
         <div class="window-body">
-            <img src="./assets/cute-photo.jpg" alt="Us" style="width:100%; border: 2px inset #fff;">
+            <img src="./assets/cute-photo.jpg" alt="Insert Photo Here" style="width:100%; border: 2px inset #fff;">
             <p style="text-align:center">Best Day Ever ❤️</p>
         </div>
     </div>
@@ -72,4 +72,50 @@
                 <button aria-label="Close" onclick="closeWindow('video-window')"></button>
             </div>
         </div>
-        <div class="
+        <div class="window-body">
+            <video width="100%" controls>
+                <source src="./assets/video.mp4" type="video/mp4">
+                Video not found.
+            </video>
+        </div>
+    </div>
+
+    <div id="poetry-window" class="window draggable" style="display: none; top: 20%; left: 20%;">
+        <div class="title-bar">
+            <div class="title-bar-text">Notepad</div>
+            <div class="title-bar-controls">
+                <button aria-label="Close" onclick="closeWindow('poetry-window')"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <textarea style="width: 100%; height: 200px; resize: none; border: none; outline: none; background: white;">
+Happy Valentine's Day!
+
+(Write your real poem here...)
+            </textarea>
+        </div>
+    </div>
+    
+     <div id="music-window" class="window draggable" style="display: none; top: 30%; left: 30%;">
+        <div class="title-bar">
+            <div class="title-bar-text">Winamp</div>
+            <div class="title-bar-controls">
+                <button aria-label="Close" onclick="closeWindow('music-window')"></button>
+            </div>
+        </div>
+        <div class="window-body">
+             <p>Loading Playlist...</p>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <button class="start-button" onclick="toggleStartMenu()">
+            <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" alt="Win">
+            <b>Start ❤️</b>
+        </button>
+        <div class="time-box" id="clock">12:00 PM</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
