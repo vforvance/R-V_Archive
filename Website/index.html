@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoveOS 98</title>
+    <link rel="stylesheet" href="https://unpkg.com/98.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="desktop-bg">
+
+    <div id="boot-screen">
+        <div id="energy-star">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Energy_Star_logo.svg/1024px-Energy_Star_logo.svg.png" alt="Energy Star">
+        </div>
+        <div id="boot-content">
+            <pre id="boot-lines"></pre>
+        </div>
+    </div>
+
+    <div id="login-overlay" style="display:none;">
+        <div class="window" style="width: 350px;">
+            <div class="title-bar"><div class="title-bar-text">Enter Network Password</div></div>
+            <div class="window-body">
+                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
+                    <img src="https://win98icons.alexmeub.com/icons/png/key_padlock-0.png" width="48" height="48">
+                    <div>
+                        <p>Type a user name and password to log on to LoveOS.</p>
+                        <div class="field-row" style="margin-bottom: 5px;">
+                            <label for="login-user">User:</label>
+                            <select id="login-user" style="width: 150px;">
+                                <option value="Venance">Venance</option>
+                                <option value="Rehema">Rehema</option>
+                            </select>
+                        </div>
+                        <div class="field-row">
+                            <label for="login-pass">Password:</label>
+                            <input type="password" id="login-pass" style="width: 150px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="field-row" style="justify-content: flex-end;">
+                    <button id="btn-login-ok">OK</button>
+                    <button onclick="location.reload()">Cancel</button>
+                </div>
+                <div id="login-error" style="color:red; margin-top:5px; text-align:center;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="desktop">
+        <div class="icon" ondblclick="openWindow('files-window'); renderFiles();">
+            <img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-4.png">
+            <span>My Files</span>
+        </div>
+        
+        <div class="icon" ondblclick="openWindow('music-window')">
+            <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png">
+            <span>Music</span>
+        </div>
+        <div class="icon" ondblclick="openWindow('photos-window')">
+            <img src="https://win98icons.alexmeub.com/icons/png/camera3-2.png">
+            <span>Photos</span>
+        </div>
+        <div class="icon" ondblclick="openWindow('poetry-window')">
+            <img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png">
+            <span>Love_Letter</span>
+        </div>
+        
+        <div class="icon" ondblclick="openWindow('paint-window')">
+            <img src="https://win98icons.alexmeub.com/icons/png/paint-4.png">
+            <span>MS Paint</span>
+        </div>
+
+        <div class="icon" ondblclick="openWindow('bored-window')">
+            <img src="https://win98icons.alexmeub.com/icons/png/joystick-0.png">
+            <span>Bored?</span>
+        </div>
+
+        <div class="icon" ondblclick="sendNotification()">
+            <img src="https://win98icons.alexmeub.com/icons/png/pager-0.png">
+            <span>Call Me</span>
+        </div>
+    </div>
+
+    <div id="start-menu" class="start-menu" style="display: none;">
+        <div class="sidebar"><span class="vertical-text">LoveOS 98</span></div>
+        <div class="menu-items">
+            <div class="menu-item" onclick="openWindow('settings-window'); toggleStartMenu()">
+                <img src="https://win98icons.alexmeub.com/icons/png/settings_gear-0.png"> Settings
+            </div>
+            <div class="divider"></div>
+            <div class="menu-item" onclick="logout()">
+                <img src="https://win98icons.alexmeub.com/icons/png/key_padlock-0.png"> Log Off...
+            </div>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <button class="start-button" onclick="toggleStartMenu()">
+            <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png"> <b>Start</b>
+        </button>
+        <div class="time-box" id="clock">12:00 PM</div>
+    </div>
+
+    <div id="files-window" class="window draggable" style="display: none; top: 15%; left: 15%; width: 400px; height: 300px;">
+        <div class="title-bar"><div class="title-bar-text">My Files</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('files-window')"></button></div></div>
+        <div class="window-body" style="height: calc(100% - 30px); display: flex; flex-direction: column;">
+            <div class="toolbar" style="padding-bottom: 10px; border-bottom: 1px solid #808080; margin-bottom: 10px;">
+                <button onclick="createNewFile()">+ New Text File</button>
+                <button onclick="document.getElementById('file-upload-input').click()">+ Upload Photo</button>
+                <input type="file" id="file-upload-input" style="display: none;" accept="image/*" onchange="handleFileUpload(event)">
+                <button onclick="clearAllFiles()" style="margin-left: 10px;">Format Disk (Clear)</button>
+            </div>
+            <div id="file-list" style="background: white; flex-grow: 1; border: 2px inset #dfdfdf; padding: 10px; display: flex; flex-wrap: wrap; gap: 15px; align-content: flex-start; overflow-y: auto;">
+                </div>
+        </div>
+    </div>
+
+    <div id="paint-window" class="window draggable" style="display: none; top: 5%; left: 5%; width: 600px; height: 450px;">
+        <div class="title-bar"><div class="title-bar-text">Paint</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('paint-window')"></button></div></div>
+        <div class="window-body" style="height: 100%; margin: 0; padding: 0;">
+            <iframe src="https://jspaint.app/#local:695730e53389e8" width="100%" height="100%" style="border:none;"></iframe>
+        </div>
+    </div>
+
+    <div id="bored-window" class="window draggable" style="display: none; top: 10%; left: 10%; width: 500px; height: 400px;">
+        <div class="title-bar"><div class="title-bar-text">The Useless Web</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('bored-window')"></button></div></div>
+        <div class="window-body" style="height: 100%; margin: 0; padding: 0;">
+            <iframe src="https://theuselessweb.com/" width="100%" height="100%" style="border:none;"></iframe>
+        </div>
+    </div>
+
+    <div id="settings-window" class="window draggable" style="display: none; top: 20%; left: 20%;">
+        <div class="title-bar"><div class="title-bar-text">Display Properties</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('settings-window')"></button></div></div>
+        <div class="window-body">
+            <p>Wallpaper:</p>
+            <input type="file" id="bg-upload" accept="image/*" onchange="changeBackground(event)">
+            <button onclick="resetBackground()" style="margin-top:10px">Reset to Default</button>
+        </div>
+    </div>
+
+    <div id="music-window" class="window draggable" style="display: none; top: 30%; left: 30%;">
+        <div class="title-bar"><div class="title-bar-text">Spotify Player</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('music-window')"></button></div></div>
+        <div class="window-body">
+            <select onchange="document.getElementById('spotify-frame').src=this.value" style="width: 100%; margin-bottom: 5px;">
+                <option value="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M">Romance Playlist</option>
+                <option value="https://open.spotify.com/embed/playlist/37i9dQZF1DX50QitC6McUh">Chill Vibes</option>
+            </select>
+            <iframe id="spotify-frame" src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M" width="100%" height="152" frameBorder="0" allow="encrypted-media"></iframe>
+        </div>
+    </div>
+
+    <div id="photos-window" class="window draggable" style="display: none; top: 10%; left: 10%;">
+        <div class="title-bar"><div class="title-bar-text">Photo Viewer</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('photos-window')"></button></div></div>
+        <div class="window-body">
+            <img id="current-photo" src="Artifacts/Gemini_Generated_Image_5jaj355jaj355jaj.png" style="width:100%; border: 2px inset #fff;">
+            <div style="display:flex; justify-content:center; gap:5px; margin-top:5px;">
+                <button onclick="changePhoto(-1)">Back</button>
+                <button onclick="changePhoto(1)">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="poetry-window" class="window draggable" style="display: none; top: 20%; left: 20%;">
+        <div class="title-bar"><div class="title-bar-text">Notepad</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('poetry-window')"></button></div></div>
+        <div class="window-body">
+            <textarea id="notepad-content" style="width: 100%; height: 200px; resize: none; background: white; font-family: monospace;">Happy Valentine's Day!</textarea>
+            <button onclick="saveCurrentNotepad()" style="margin-top:5px;">Save to My Files</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
