@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Archive</title>
+    <title>Be My Valentine?</title>
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -16,27 +16,52 @@
         </div>
         <div class="icon" ondblclick="openWindow('video-window')">
             <img src="https://win98icons.alexmeub.com/icons/png/film_strip-0.png" alt="Videos">
-            <span>Videos</span>
+            <span>Our Videos</span>
         </div>
         <div class="icon" ondblclick="openWindow('photos-window')">
             <img src="https://win98icons.alexmeub.com/icons/png/camera3-2.png" alt="Photos">
-            <span>Photos</span>
+            <span>Us.jpg</span>
         </div>
         <div class="icon" ondblclick="openWindow('poetry-window')">
             <img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png" alt="Poetry">
-            <span>For_Her.txt</span>
+            <span>Love_Letter.txt</span>
         </div>
     </div>
 
-    <div id="music-window" class="window draggable" style="display: none; top: 10%; left: 10%;">
+    <div id="start-menu" class="start-menu" style="display: none;">
+        <div class="sidebar">
+            <span class="vertical-text">LoveOS 98</span>
+        </div>
+        <div class="menu-items">
+            <div class="menu-item" onclick="openWindow('music-window'); toggleStartMenu()">
+                <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png"> Playlist
+            </div>
+            <div class="menu-item" onclick="openWindow('photos-window'); toggleStartMenu()">
+                <img src="https://win98icons.alexmeub.com/icons/png/camera3-2.png"> Photos
+            </div>
+            <div class="menu-item" onclick="openWindow('video-window'); toggleStartMenu()">
+                <img src="https://win98icons.alexmeub.com/icons/png/film_strip-0.png"> Videos
+            </div>
+            <div class="menu-item" onclick="openWindow('poetry-window'); toggleStartMenu()">
+                <img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png"> Poetry
+            </div>
+            <div class="divider"></div>
+            <div class="menu-item" onclick="alert('Shutting down... just kidding, never leaving you.')">
+                <img src="https://win98icons.alexmeub.com/icons/png/shut_down_cool-4.png"> Shut Down
+            </div>
+        </div>
+    </div>
+
+    <div id="photos-window" class="window draggable" style="display: none; top: 10%; left: 10%;">
         <div class="title-bar">
-            <div class="title-bar-text">Winamp - Our Songs</div>
+            <div class="title-bar-text">Photo Viewer</div>
             <div class="title-bar-controls">
-                <button aria-label="Close" onclick="closeWindow('music-window')"></button>
+                <button aria-label="Close" onclick="closeWindow('photos-window')"></button>
             </div>
         </div>
         <div class="window-body">
-            <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            <img src="./assets/cute-photo.jpg" alt="Us" style="width:100%; border: 2px inset #fff;">
+            <p style="text-align:center">Best Day Ever ❤️</p>
         </div>
     </div>
 
@@ -47,38 +72,4 @@
                 <button aria-label="Close" onclick="closeWindow('video-window')"></button>
             </div>
         </div>
-        <div class="window-body">
-            <p>Our First Date:</p>
-            <iframe width="100%" height="200" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-    </div>
-
-    <div id="poetry-window" class="window draggable" style="display: none; top: 20%; left: 20%;">
-        <div class="title-bar">
-            <div class="title-bar-text">Notepad</div>
-            <div class="title-bar-controls">
-                <button aria-label="Close" onclick="closeWindow('poetry-window')"></button>
-            </div>
-        </div>
-        <div class="window-body">
-            <textarea style="width: 100%; height: 200px; resize: none;">
-My love,
-
-This is a digital space
-Just for your pretty face.
-(Type your poems here...)
-            </textarea>
-        </div>
-    </div>
-
-    <div class="taskbar">
-        <button class="start-button">
-            <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" alt="Start">
-            <b>Start</b>
-        </button>
-        <div class="time-box" id="clock">12:00 PM</div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+        <div class="
