@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Be My Valentine?</title>
+    <title>LoveOS 98</title>
     <link rel="stylesheet" href="https://unpkg.com/98.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -26,6 +26,10 @@
             <img src="https://win98icons.alexmeub.com/icons/png/world-2.png">
             <span>Rainy Mood</span>
         </div>
+        <div class="icon" ondblclick="openWindow('poetry-window')">
+            <img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png">
+            <span>Love_Letter.txt</span>
+        </div>
     </div>
 
     <div id="start-menu" class="start-menu" style="display: none;">
@@ -41,26 +45,57 @@
         </div>
     </div>
 
-    <div id="settings-window" class="window draggable" style="display: none; top: 20%; left: 20%;">
+    <div id="music-window" class="window draggable" style="display: none; top: 100px; left: 100px;">
         <div class="title-bar">
-            <div class="title-bar-text">Display Properties</div>
+            <div class="title-bar-text">Spotify Player</div>
+            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('music-window')"></button></div>
+        </div>
+        <div class="window-body">
+            <iframe src="https://open.spotify.com/embed/playlist/37i9dQZF1DX4p6VqH8M6p3" width="100%" height="152" frameBorder="0" allow="encrypted-media"></iframe>
+        </div>
+    </div>
+
+    <div id="photos-window" class="window draggable" style="display: none; top: 50px; left: 50px;">
+        <div class="title-bar">
+            <div class="title-bar-text">Photo Viewer</div>
+            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('photos-window')"></button></div>
+        </div>
+        <div class="window-body">
+            <img id="current-photo" src="Gemini_Generated_Image_5jaj355jaj355jaj.png" style="width:100%; height: auto; border: 2px inset #fff;">
+            <div class="field-row" style="justify-content: center; margin-top: 10px;">
+                <button onclick="changePhoto(-1)">Back</button>
+                <button onclick="changePhoto(1)">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rain-window" class="window draggable" style="display: none; top: 20px; left: 400px;">
+        <div class="title-bar">
+            <div class="title-bar-text">Rainy Mood</div>
+            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('rain-window')"></button></div>
+        </div>
+        <div class="window-body">
+            <iframe src="https://rainymood.com/" width="300" height="400" style="border:none;"></iframe>
+        </div>
+    </div>
+
+    <div id="settings-window" class="window draggable" style="display: none; top: 200px; left: 200px;">
+        <div class="title-bar">
+            <div class="title-bar-text">Settings</div>
             <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('settings-window')"></button></div>
         </div>
         <div class="window-body">
-            <p>Change Desktop Wallpaper:</p>
-            <input type="file" id="bg-upload" accept="image/*" onchange="uploadBackground(event)">
-            <div class="field-row" style="margin-top:10px">
-                <button onclick="resetBackground()">Restore Default</button>
-            </div>
+            <p>Wallpaper:</p>
+            <input type="file" accept="image/*" onchange="uploadBackground(event)">
+            <button onclick="resetBackground()" style="margin-top:10px">Reset</button>
         </div>
     </div>
 
     <div class="taskbar">
         <button class="start-button" onclick="toggleStartMenu()">
             <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png">
-            <span>Start ❤️</span>
+            <b>Start ❤️</b>
         </button>
-        <div class="taskbar-divider"></div>
         <div class="time-box" id="clock">12:00 PM</div>
     </div>
 
