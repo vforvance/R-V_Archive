@@ -1,157 +1,47 @@
-body {
-    background-color: #ffb7b2; /* Valentine Pink */
-    font-family: 'Pixelated MS Sans Serif', Arial;
-    margin: 0;
-    overflow: hidden;
-    height: 100vh;
+/* BACKGROUND SCALING */
+#desktop-bg {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background 0.3s ease;
 }
 
-/* DESKTOP ICONS */
-#desktop {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    flex-wrap: wrap;
-    height: 80vh;
-}
-
-.icon {
-    width: 80px;
-    text-align: center;
-    color: #8b0000;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-.icon img {
-    width: 32px;
-    height: 32px;
-    margin-bottom: 5px;
-}
-
-/* WINDOWS */
-.window {
+/* STICKY NOTES */
+.sticky-note {
     position: absolute;
-    width: 350px;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-    z-index: 10;
-    background: #ffe4e1;
-}
-
-.title-bar {
-    background: linear-gradient(90deg, #ff6961, #ffb7b2);
-    cursor: grab;
-}
-
-/* START MENU */
-.start-menu {
-    position: absolute;
-    bottom: 32px; /* Sits right above taskbar */
-    left: 4px;
-    width: 200px;
-    background: #c0c0c0;
-    border: 2px outset #fff;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-    z-index: 9999; /* Always on top */
-    display: flex;
-}
-
-.sidebar {
-    width: 25px;
-    background: #800000;
-    color: white;
-    display: flex;
-    align-items: end;
-    padding-bottom: 5px;
-}
-
-.vertical-text {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    font-weight: bold;
+    width: 150px;
+    background: #ffffa5;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     padding: 5px;
-    font-size: 14px;
+    z-index: 100;
 }
 
-.menu-items {
-    flex-grow: 1;
-    padding: 2px;
-}
-
-.menu-item {
-    padding: 5px 10px;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    color: black;
-}
-
-.menu-item:hover {
-    background: #ff6961;
-    color: white;
-}
-
-.menu-item img {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
-}
-
-.divider {
-    border-top: 1px solid #888;
-    border-bottom: 1px solid #fff;
-    margin: 2px 0;
-}
-
-/* TASKBAR FIXES */
-.taskbar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
+.sticky-note textarea {
     width: 100%;
-    height: 30px;
-    background: #c0c0c0;
-    border-top: 2px solid #fff;
-    display: flex;
-    align-items: center;
-    padding: 2px;
-    z-index: 5000; /* Extremely high so nothing covers it */
+    height: 100px;
+    background: transparent;
+    border: none;
+    font-family: 'Comic Sans MS', cursive;
+    resize: none;
 }
 
-/* Explicit Start Button Styling */
-.start-button {
+.sticky-header {
+    background: #e6e600;
+    height: 15px;
+    cursor: move;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.close-note {
+    cursor: pointer;
+    font-size: 10px;
+    padding-right: 2px;
+}
+
+.photo-container {
+    background: black;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    padding: 2px 6px;
-    margin-left: 2px;
-    height: 24px;
-    background: #c0c0c0;
-    border: 2px outset #fff; /* Makes it pop out */
-    color: black;
-    cursor: pointer;
-}
-
-/* Button Pressed State */
-.start-button:active {
-    border: 2px inset #fff;
-}
-
-.start-button img {
-    margin-right: 4px;
-    width: 16px;
-    height: 16px;
-}
-
-.time-box {
-    margin-left: auto;
-    background: #c0c0c0;
-    border: 2px inset #dfdfdf;
-    padding: 2px 10px;
-    margin-right: 5px;
-    font-size: 12px;
-    color: black;
 }
