@@ -96,6 +96,34 @@ function showDesktop() {
 /* --- VALENTINE PROMPT --- */
 let valentineCount = 0; // Track how many times "No" is clicked
 
+/* --- FLYING HEARTS CELEBRATION --- */
+function createFlyingHearts() {
+    const heartCount = 30;
+    for (let i = 0; i < heartCount; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'flying-heart';
+        heart.innerHTML = '❤️';
+        
+        const duration = Math.random() * 2 + 3;
+        const startX = Math.random() * window.innerWidth;
+        const animationVariation = i % 3;
+        
+        heart.style.cssText = `
+            position: fixed;
+            left: ${startX}px;
+            top: ${window.innerHeight + 50}px;
+            font-size: ${Math.random() * 30 + 20}px;
+            pointer-events: none;
+            z-index: 40000;
+            opacity: 1;
+            animation: heartFly${animationVariation} ${duration}s ease-out forwards;
+        `;
+        document.body.appendChild(heart);
+        
+        setTimeout(() => heart.remove(), duration * 1000 + 100);
+    }
+}
+
 function showValentinePrompt() {
     valentineCount += 1;
     
@@ -133,20 +161,30 @@ function showValentinePrompt() {
     const noBtn = dialog.querySelector('#val-no');
     
     yesBtn.onclick = () => {
-        dialog.remove();
-        valentineCount = 0;
-        alert('❤️ Yay! Lets celebrate together! ❤️');
+        createFlyingHearts();
+        setTimeout(() => {
+            dialog.remove();
+            valentineCount = 0;
+            alert('❤️ Yay! Lets celebrate together! ❤️');
+        }, 500);
     };
     
-    // No button runs away but stays visible
+    // No button runs away but stays in bounded area around the dialog
+    const dialogCenterX = window.innerWidth / 2;
+    const dialogCenterY = window.innerHeight / 2;
+    const boundaryRadius = 175; // Stay within 250px of dialog center
+    
     const moveNoButton = () => {
-        const maxX = Math.max(0, window.innerWidth - 100);
-        const maxY = Math.max(0, window.innerHeight - 50);
-        const randomX = Math.floor(Math.random() * maxX);
-        const randomY = Math.floor(Math.random() * maxY);
+        // Generate random position within bounded area
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * boundaryRadius;
+        const randomX = dialogCenterX + Math.cos(angle) * distance - 80;
+        const randomY = dialogCenterY + Math.sin(angle) * distance - 55;
+        
         noBtn.style.position = 'fixed';
-        noBtn.style.left = randomX + 'px';
-        noBtn.style.top = randomY + 'px';
+        noBtn.style.left = Math.max(0, Math.min(randomX, window.innerWidth - 100)) + 'px';
+        noBtn.style.top = Math.max(0, Math.min(randomY, window.innerHeight - 75)) + 'px';
+        noBtn.style.zIndex = '50005';
     };
     
     noBtn.onmouseover = moveNoButton;

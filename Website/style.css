@@ -157,3 +157,53 @@ body {
 .valentine-yes:hover, .valentine-no:hover {
     background: #dfdfdf;
 }
+
+/* Flying Hearts Animation with multiple variations for natural sway */
+@keyframes heartFly0 {
+    0% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-40vh) translateX(80px) rotate(180deg) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(120px) rotate(360deg) scale(0);
+        opacity: 0;
+    }
+}
+
+@keyframes heartFly1 {
+    0% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-45vh) translateX(-100px) rotate(-180deg) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(-150px) rotate(-360deg) scale(0);
+        opacity: 0;
+    }
+}
+
+@keyframes heartFly2 {
+    0% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-42vh) translateX(60px) rotate(180deg) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(-80px) rotate(360deg) scale(0);
+        opacity: 0;
+    }
+}
+
+.flying-heart {
+    filter: drop-shadow(0 0 8px rgba(255, 20, 147, 0.7));
+}
