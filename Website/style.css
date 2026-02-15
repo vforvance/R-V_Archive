@@ -210,3 +210,56 @@ body {
     pointer-events: none;
     line-height: 1;
 }
+
+/* Rose Flying Animations */
+@keyframes roseFly0 {
+    0% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-40vh) translateX(100px) rotate(180deg) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(140px) rotate(360deg) scale(0);
+        opacity: 0;
+    }
+}
+
+@keyframes roseFly1 {
+    0% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-45vh) translateX(-120px) rotate(-180deg) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(-170px) rotate(-360deg) scale(0);
+        opacity: 0;
+    }
+}
+
+@keyframes roseFly2 {
+    0% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-42vh) translateX(80px) rotate(180deg) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(-100px) rotate(360deg) scale(0);
+        opacity: 0;
+    }
+}
+
+.flying-rose {
+    filter: drop-shadow(0 0 10px rgba(220, 20, 60, 0.8));
+    position: fixed;
+    pointer-events: none;
+    line-height: 1;
+}

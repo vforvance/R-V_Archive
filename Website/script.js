@@ -96,9 +96,12 @@ function showDesktop() {
 /* --- VALENTINE PROMPT --- */
 let valentineCount = 0; // Track how many times "No" is clicked
 
-/* --- FLYING HEARTS CELEBRATION --- */
+/* --- FLYING HEARTS & ROSES CELEBRATION --- */
 function createFlyingHearts() {
-    const heartCount = 30;
+    const heartCount = 90;
+    const roseCount = 40;
+    
+    // Create hearts
     for (let i = 0; i < heartCount; i++) {
         const heart = document.createElement('div');
         heart.className = 'flying-heart';
@@ -123,6 +126,34 @@ function createFlyingHearts() {
         
         setTimeout(() => {
             if (heart.parentNode) heart.remove();
+        }, duration * 1000 + 100);
+    }
+    
+    // Create roses
+    for (let i = 0; i < roseCount; i++) {
+        const rose = document.createElement('div');
+        rose.className = 'flying-rose';
+        rose.innerHTML = '🌹';
+        
+        const duration = Math.random() * 2 + 3.5;
+        const startX = Math.random() * window.innerWidth;
+        const animationVariation = i % 3;
+        
+        rose.style.cssText = `
+            position: fixed;
+            left: ${startX}px;
+            top: ${window.innerHeight + 50}px;
+            font-size: ${Math.random() * 25 + 18}px;
+            pointer-events: none;
+            z-index: 60001;
+            opacity: 1;
+            animation: roseFly${animationVariation} ${duration}s ease-out forwards;
+            display: block;
+        `;
+        document.body.appendChild(rose);
+        
+        setTimeout(() => {
+            if (rose.parentNode) rose.remove();
         }, duration * 1000 + 100);
     }
 }
