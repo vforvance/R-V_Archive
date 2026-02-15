@@ -25,17 +25,58 @@ function runBootSequence() {
 function showLoginScreen() {
     document.getElementById('boot-screen').style.display = 'none';
     document.getElementById('login-overlay').style.display = 'flex';
+    initUserTiles();
 }
 
-document.getElementById('btn-login-ok').addEventListener('click', () => {
-    const user = document.getElementById('login-user').value;
-    const pass = document.getElementById('login-pass').value;
-    if (USERS[user] && USERS[user] === pass) {
-        localStorage.setItem('isLoggedIn', 'true');
-        document.getElementById('login-overlay').style.display = 'none';
-        showDesktop();
-    } else {
-        document.getElementById('login-error').innerText = "Incorrect Password";
+let selectedUser = null;
+
+function initUserTiles() {
+    document.querySelectorAll('.user-tile').forEach(tile => {
+        tile.onclick = () => selectUser(tile.dataset.user);
+    });
+}
+
+function selectUser(user) {
+    selectedUser = user;
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('password-overlay').style.display = 'flex';
+    document.getElementById('pwd-title').innerText = `Welcome ${user}!`;
+    document.getElementById('login-pass').value = '';
+    document.getElementById('pwd-error').innerText = '';
+    document.getElementById('login-pass').focus();
+}
+
+function goBackToUserSelect() {
+    document.getElementById('password-overlay').style.display = 'none';
+    document.getElementById('login-overlay').style.display = 'flex';
+    selectedUser = null;
+    document.getElementById('pwd-error').innerText = '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const pwdInput = document.getElementById('login-pass');
+    if (pwdInput) {
+        pwdInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && selectedUser) {
+                document.getElementById('btn-login-ok').click();
+            }
+        });
+    }
+    
+    document.getElementById('btn-login-ok').addEventListener('click', () => {
+        const pass = document.getElementById('login-pass').value;
+        if (selectedUser && USERS[selectedUser] && USERS[selectedUser] === pass) {
+            localStorage.setItem('isLoggedIn', 'true');
+            document.getElementById('password-overlay').style.display = 'none';
+            showDesktop();
+        } else {
+            document.getElementById('pwd-error').innerText = "Incorrect Password";
+        }
+    });
+    
+    const backBtn = document.getElementById('btn-login-back');
+    if (backBtn) {
+        backBtn.addEventListener('click', goBackToUserSelect);
     }
 });
 
@@ -49,6 +90,79 @@ function showDesktop() {
     document.querySelector('.taskbar').style.display = 'flex';
     loadSettings();
     populateStartMenu();
+    setTimeout(showValentinePrompt, 800); // Show valentine prompt after desktop loads
+}
+
+/* --- VALENTINE PROMPT --- */
+let valentineCount = 0; // Track how many times "No" is clicked
+
+function showValentinePrompt() {
+    valentineCount += 1;
+    
+    // Create the valentine dialog with Windows 98 styling
+    const dialog = document.createElement('div');
+    dialog.className = 'window valentine-dialog';
+    dialog.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 350px;
+        z-index: 50000;
+    `;
+    
+    dialog.innerHTML = `
+        <div class="title-bar">
+            <div class="title-bar-text">❤️ Valentine</div>
+        </div>
+        <div class="window-body">
+            <div style="text-align: center; padding: 15px;">
+                <div style="font-size: 60px; margin-bottom: 15px;">❤️</div>
+                <p style="font-size: 14px; margin: 15px 0; font-family: 'MS Sans Serif', Arial, sans-serif;">Will you be my Valentine?</p>
+                <div style="display: flex; gap: 8px; justify-content: center; margin-top: 20px;">
+                    <button id="val-yes" class="valentine-yes" style="min-width: 80px; padding: 6px 12px;">Yes ❤️</button>
+                    <button id="val-no" class="valentine-no" style="min-width: 80px; padding: 6px 12px;">No</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    
+    const yesBtn = dialog.querySelector('#val-yes');
+    const noBtn = dialog.querySelector('#val-no');
+    
+    yesBtn.onclick = () => {
+        dialog.remove();
+        valentineCount = 0;
+        alert('❤️ Yay! Lets celebrate together! ❤️');
+    };
+    
+    // No button runs away
+    noBtn.onmouseover = () => {
+        const maxX = window.innerWidth - 100;
+        const maxY = window.innerHeight - 50;
+        const randomX = Math.floor(Math.random() * maxX);
+        const randomY = Math.floor(Math.random() * maxY);
+        noBtn.style.position = 'fixed';
+        noBtn.style.left = randomX + 'px';
+        noBtn.style.top = randomY + 'px';
+    };
+    
+    // If user manages to click No twice, duplicate prompts
+    noBtn.onclick = () => {
+        if (valentineCount >= 2) {
+            // Create two more prompts
+            dialog.remove();
+            showValentinePrompt();
+            showValentinePrompt();
+        } else {
+            valentineCount += 1;
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = (Math.random() * (window.innerWidth - 100)) + 'px';
+            noBtn.style.top = (Math.random() * (window.innerHeight - 50)) + 'px';
+        }
+    };
 }
 
 /* --- 2. NOTIFICATION SYSTEM (Pager) --- */

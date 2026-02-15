@@ -19,31 +19,39 @@
     </div>
 
     <div id="login-overlay" style="display:none;">
-        <div class="window" style="width: 350px;">
-            <div class="title-bar"><div class="title-bar-text">Enter Network Password</div></div>
+        <div class="window" style="width: 400px;">
+            <div class="title-bar"><div class="title-bar-text">Welcome to LoveOS 98</div></div>
             <div class="window-body">
-                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
-                    <img src="https://win98icons.alexmeub.com/icons/png/key_padlock-0.png" width="48" height="48">
-                    <div>
-                        <p>Type a user name and password to log on to LoveOS.</p>
-                        <div class="field-row" style="margin-bottom: 5px;">
-                            <label for="login-user">User:</label>
-                            <select id="login-user" style="width: 150px;">
-                                <option value="Venance">Venance</option>
-                                <option value="Rehema">Rehema</option>
-                            </select>
-                        </div>
-                        <div class="field-row">
-                            <label for="login-pass">Password:</label>
-                            <input type="password" id="login-pass" style="width: 150px;">
-                        </div>
+                <p style="text-align: center; margin-bottom: 20px;">Select a user to log in</p>
+                <div id="user-tiles-container" style="display: flex; gap: 20px; justify-content: center; margin-bottom: 20px;">
+                    <div class="user-tile" data-user="Venance" style="cursor: pointer; border: 2px outset #fff; padding: 15px; text-align: center; background: #c0c0c0;">
+                        <img src="pictures/Venance.png" style="width: 80px; height: 80px; border: 2px solid #000; margin-bottom: 10px;" alt="Venance">
+                        <p style="margin: 5px 0; font-weight: bold;">Venance</p>
+                    </div>
+                    <div class="user-tile" data-user="Rehema" style="cursor: pointer; border: 2px outset #fff; padding: 15px; text-align: center; background: #c0c0c0;">
+                        <img src="pictures/Rehema.png" style="width: 80px; height: 80px; border: 2px solid #000; margin-bottom: 10px;" alt="Rehema">
+                        <p style="margin: 5px 0; font-weight: bold;">Rehema</p>
                     </div>
                 </div>
-                <div class="field-row" style="justify-content: flex-end;">
-                    <button id="btn-login-ok">OK</button>
-                    <button onclick="location.reload()">Cancel</button>
+                <div id="login-error" style="color:red; margin-bottom:10px; text-align:center;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="password-overlay" style="display:none;">
+        <div class="window" style="width: 350px;">
+            <div class="title-bar"><div class="title-bar-text" id="pwd-title">Welcome!</div></div>
+            <div class="window-body">
+                <p id="pwd-text" style="text-align: center; margin-bottom: 15px;">Enter your password</p>
+                <div class="field-row" style="margin-bottom: 10px;">
+                    <label for="login-pass">Password:</label>
+                    <input type="password" id="login-pass" style="width: 200px;">
                 </div>
-                <div id="login-error" style="color:red; margin-top:5px; text-align:center;"></div>
+                <div class="field-row" style="justify-content: flex-end; gap: 5px;">
+                    <button id="btn-login-ok">OK</button>
+                    <button onclick="goBackToUserSelect()">Cancel</button>
+                </div>
+                <div id="pwd-error" style="color:red; margin-top:10px; text-align:center;"></div>
             </div>
         </div>
     </div>
