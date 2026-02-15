@@ -138,10 +138,10 @@ function showValentinePrompt() {
         alert('❤️ Yay! Lets celebrate together! ❤️');
     };
     
-    // No button runs away
-    noBtn.onmouseover = () => {
-        const maxX = window.innerWidth - 100;
-        const maxY = window.innerHeight - 50;
+    // No button runs away but stays visible
+    const moveNoButton = () => {
+        const maxX = Math.max(0, window.innerWidth - 100);
+        const maxY = Math.max(0, window.innerHeight - 50);
         const randomX = Math.floor(Math.random() * maxX);
         const randomY = Math.floor(Math.random() * maxY);
         noBtn.style.position = 'fixed';
@@ -149,19 +149,10 @@ function showValentinePrompt() {
         noBtn.style.top = randomY + 'px';
     };
     
-    // If user manages to click No twice, duplicate prompts
-    noBtn.onclick = () => {
-        if (valentineCount >= 2) {
-            // Create two more prompts
-            dialog.remove();
-            showValentinePrompt();
-            showValentinePrompt();
-        } else {
-            valentineCount += 1;
-            noBtn.style.position = 'fixed';
-            noBtn.style.left = (Math.random() * (window.innerWidth - 100)) + 'px';
-            noBtn.style.top = (Math.random() * (window.innerHeight - 50)) + 'px';
-        }
+    noBtn.onmouseover = moveNoButton;
+    noBtn.onclick = (e) => {
+        e.preventDefault();
+        moveNoButton();
     };
 }
 
