@@ -171,3 +171,21 @@ body {
     pointer-events: none;
     line-height: 1;
 }
+
+/* Glowing Text Animation */
+@keyframes glowPulse {
+    0%, 100% {
+        text-shadow: 0 0 20px #ff1493, 0 0 40px #ff1493, 0 0 60px #ff1493, 0 0 80px #ff1493, 0 0 100px #ff1493;
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    50% {
+        text-shadow: 0 0 30px #ff1493, 0 0 50px #ff1493, 0 0 80px #ff1493, 0 0 120px #ff1493, 0 0 150px #ff1493;
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.9;
+    }
+}
+
+.glowing-text-overlay {
+    pointer-events: none;
+}

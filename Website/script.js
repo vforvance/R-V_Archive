@@ -166,6 +166,31 @@ function createFlyingHearts(startX, startY) {
     }
 }
 
+function showGlowingText() {
+    const textOverlay = document.createElement('div');
+    textOverlay.className = 'glowing-text-overlay';
+    textOverlay.innerHTML = 'WHOOOHOO';
+    textOverlay.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 120px;
+        font-weight: bold;
+        color: #ff1493;
+        text-shadow: 0 0 20px #ff1493, 0 0 40px #ff1493, 0 0 60px #ff1493, 0 0 80px #ff1493, 0 0 100px #ff1493;
+        z-index: 70000;
+        font-family: Arial, sans-serif;
+        letter-spacing: 8px;
+        animation: glowPulse 0.6s ease-in-out infinite;
+    `;
+    document.body.appendChild(textOverlay);
+    
+    setTimeout(() => {
+        textOverlay.remove();
+    }, 5000);
+}
+
 function animateParticle(element, startX, startY, angle, velocity, duration) {
     let x = startX;
     let y = startY;
@@ -252,10 +277,10 @@ function showValentinePrompt() {
         const startX = rect.left + rect.width / 2;
         const startY = rect.top + rect.height / 2;
         createFlyingHearts(startX, startY);
+        showGlowingText();
         setTimeout(() => {
             dialog.remove();
             valentineCount = 0;
-            alert('❤️ Yay! Lets celebrate together! ❤️');
         }, 500);
     };
     
