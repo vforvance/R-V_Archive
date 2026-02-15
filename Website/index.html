@@ -11,7 +11,7 @@
 
     <div id="boot-screen">
         <div id="energy-star">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Energy_Star_logo.svg/1024px-Energy_Star_logo.svg.png" alt="Energy Star">
+            <img src="https://win98icons.alexmeub.com/icons/png/windows_update_large-2.png" alt="LoveOS 98" style="width: 100px; height: 100px;">
         </div>
         <div id="boot-content">
             <pre id="boot-lines"></pre>
@@ -40,7 +40,7 @@
 
     <div id="password-overlay" style="display:none;">
         <div class="window" style="width: 350px;">
-            <div class="title-bar"><div class="title-bar-text" id="pwd-title">Welcome!</div></div>
+            <div class="title-bar"><div class="title-bar-text" id="pwd-title">Welcome to LoveOS 98!</div></div>
             <div class="window-body">
                 <p id="pwd-text" style="text-align: center; margin-bottom: 15px;">Enter your password</p>
                 <div class="field-row" style="margin-bottom: 10px;">
@@ -58,13 +58,13 @@
 
     <div id="desktop">
         <div class="icon" ondblclick="openWindow('files-window'); renderFiles();">
-            <img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-4.png">
+            <img src="https://win98icons.alexmeub.com/icons/png/search_directory-0.png">
             <span>My Files</span>
         </div>
         
         <div class="icon" ondblclick="openWindow('music-window')">
             <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png">
-            <span>Music</span>
+            <span>MixTapes</span>
         </div>
         <div class="icon" ondblclick="openWindow('photos-window')">
             <img src="https://win98icons.alexmeub.com/icons/png/camera3-2.png">
@@ -72,22 +72,27 @@
         </div>
         <div class="icon" ondblclick="openWindow('poetry-window')">
             <img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png">
-            <span>Love_Letter</span>
+            <span>Letter</span>
         </div>
         
         <div class="icon" ondblclick="openWindow('paint-window')">
-            <img src="https://win98icons.alexmeub.com/icons/png/paint-4.png">
+            <img src="https://win98icons.alexmeub.com/icons/png/paint_old-0.png">
             <span>MS Paint</span>
         </div>
 
         <div class="icon" ondblclick="openWindow('bored-window')">
-            <img src="https://win98icons.alexmeub.com/icons/png/joystick-0.png">
+            <img src="https://win98icons.alexmeub.com/icons/png/help_book_computer-4.png">
             <span>Bored?</span>
         </div>
 
         <div class="icon" ondblclick="sendNotification()">
-            <img src="https://win98icons.alexmeub.com/icons/png/pager-0.png">
-            <span>Call Me</span>
+            <img src="https://win98icons.alexmeub.com/icons/png/modem-2.png">
+            <span>Need Attention!</span>
+        </div>
+
+        <div class="icon" ondblclick="newStickyNote()">
+            <img src="https://win98icons.alexmeub.com/icons/png/note-2.png">
+            <span>Notes!</span>
         </div>
     </div>
 
@@ -112,7 +117,7 @@
     </div>
 
     <div id="files-window" class="window draggable" style="display: none; top: 15%; left: 15%; width: 400px; height: 300px;">
-        <div class="title-bar"><div class="title-bar-text">My Files</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('files-window')"></button></div></div>
+        <div class="title-bar"><div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/rename-5.png" style="width: 16px; height: 16px; margin-right: 4px; vertical-align: middle;"> My Files</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('files-window')"></button></div></div>
         <div class="window-body" style="height: calc(100% - 30px); display: flex; flex-direction: column;">
             <div class="toolbar" style="padding-bottom: 10px; border-bottom: 1px solid #808080; margin-bottom: 10px;">
                 <button onclick="createNewFile()">+ New Text File</button>
@@ -126,21 +131,21 @@
     </div>
 
     <div id="paint-window" class="window draggable" style="display: none; top: 5%; left: 5%; width: 600px; height: 450px;">
-        <div class="title-bar"><div class="title-bar-text">Paint</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('paint-window')"></button></div></div>
+        <div class="title-bar"><div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/paint_file-5.png" style="width: 16px; height: 16px; margin-right: 4px; vertical-align: middle;"> Paint</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('paint-window')"></button></div></div>
         <div class="window-body" style="height: 100%; margin: 0; padding: 0;">
             <iframe src="https://jspaint.app/#local:695730e53389e8" width="100%" height="100%" style="border:none;"></iframe>
         </div>
     </div>
 
     <div id="bored-window" class="window draggable" style="display: none; top: 10%; left: 10%; width: 500px; height: 400px;">
-        <div class="title-bar"><div class="title-bar-text">The Useless Web</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('bored-window')"></button></div></div>
+        <div class="title-bar"><div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/joystick-0.png" style="width: 16px; height: 16px; margin-right: 4px; vertical-align: middle;"> The Useless Web</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('bored-window')"></button></div></div>
         <div class="window-body" style="height: 100%; margin: 0; padding: 0;">
             <iframe src="https://theuselessweb.com/" width="100%" height="100%" style="border:none;"></iframe>
         </div>
     </div>
 
     <div id="settings-window" class="window draggable" style="display: none; top: 20%; left: 20%;">
-        <div class="title-bar"><div class="title-bar-text">Display Properties</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('settings-window')"></button></div></div>
+        <div class="title-bar"><div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/settings_gear-0.png" style="width: 16px; height: 16px; margin-right: 4px; vertical-align: middle;"> Display Properties</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('settings-window')"></button></div></div>
         <div class="window-body">
             <p>Wallpaper:</p>
             <input type="file" id="bg-upload" accept="image/*" onchange="changeBackground(event)">
@@ -149,7 +154,7 @@
     </div>
 
     <div id="music-window" class="window draggable" style="display: none; top: 30%; left: 30%;">
-        <div class="title-bar"><div class="title-bar-text">Spotify Player</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('music-window')"></button></div></div>
+        <div class="title-bar"><div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png" style="width: 16px; height: 16px; margin-right: 4px; vertical-align: middle;"> Spotify Player</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('music-window')"></button></div></div>
         <div class="window-body">
             <select onchange="document.getElementById('spotify-frame').src=this.value" style="width: 100%; margin-bottom: 5px;">
                 <option value="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M">Romance Playlist</option>
@@ -160,7 +165,7 @@
     </div>
 
     <div id="photos-window" class="window draggable" style="display: none; top: 10%; left: 10%;">
-        <div class="title-bar"><div class="title-bar-text">Photo Viewer</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('photos-window')"></button></div></div>
+        <div class="title-bar"><div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/camera3-2.png" style="width: 16px; height: 16px; margin-right: 4px; vertical-align: middle;"> Photo Viewer</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('photos-window')"></button></div></div>
         <div class="window-body">
             <img id="current-photo" src="pictures/Gemini_Generated_Image_5jaj355jaj355jaj.png" style="width:100%; border: 2px inset #fff;">
             <div style="display:flex; justify-content:center; gap:5px; margin-top:5px;">
@@ -171,7 +176,7 @@
     </div>
 
     <div id="poetry-window" class="window draggable" style="display: none; top: 20%; left: 20%;">
-        <div class="title-bar"><div class="title-bar-text">Notepad</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('poetry-window')"></button></div></div>
+        <div class="title-bar"><div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png" style="width: 16px; height: 16px; margin-right: 4px; vertical-align: middle;"> Notepad</div><div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('poetry-window')"></button></div></div>
         <div class="window-body">
             <textarea id="notepad-content" style="width: 100%; height: 200px; resize: none; background: white; font-family: monospace;">Happy Valentine's Day!</textarea>
             <button onclick="saveCurrentNotepad()" style="margin-top:5px;">Save to My Files</button>

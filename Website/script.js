@@ -90,6 +90,7 @@ function showDesktop() {
     document.querySelector('.taskbar').style.display = 'flex';
     loadSettings();
     populateStartMenu();
+    loadStickyNotes(); // Load saved sticky notes
     setTimeout(showValentinePrompt, 800); // Show valentine prompt after desktop loads
 }
 
@@ -316,7 +317,7 @@ function sendNotification() {
     
     fetch(`https://ntfy.sh/${topic}`, {
         method: 'POST',
-        body: '❤️ You have a new notification from LoveOS!',
+        body: '❤️ Rehema Wants Attention! ❤️',
         headers: { 'Title': 'LoveOS Request', 'Priority': 'high' }
     })
     .then(response => {
@@ -456,7 +457,9 @@ function toggleStartMenu() {
 /* --- 5. DRAGGABLE --- */
 function dragElement(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    const header = elmnt.querySelector(".title-bar");
+    
+    // Handle both title-bar (windows) and sticky-header (sticky notes)
+    const header = elmnt.querySelector(".title-bar") || elmnt.querySelector(".sticky-header");
     if (header) header.onmousedown = dragMouseDown;
 
     function dragMouseDown(e) {
@@ -464,7 +467,7 @@ function dragElement(elmnt) {
         pos3 = e.clientX; pos4 = e.clientY;
         document.onmouseup = closeDragElement;
         document.onmousemove = elementDrag;
-        bringToFront(elmnt.id);
+        if (elmnt.id) bringToFront(elmnt.id);
     }
 
     function elementDrag(e) {
@@ -477,6 +480,8 @@ function dragElement(elmnt) {
 
     function closeDragElement() { document.onmouseup = null; document.onmousemove = null; }
 }
+
+// Draggable windows
 document.querySelectorAll('.window').forEach(dragElement);
 
 /* --- 6. BACKGROUND SETTINGS --- */
@@ -518,6 +523,83 @@ function populateStartMenu() {
         item.onclick = () => { eval(dblclick); toggleStartMenu(); };
         container.insertBefore(item, divider);
     });
+}
+
+// Photo Viewer Navigation
+let currentPhotoIndex = 0;
+function changePhoto(direction) {
+    const files = getFiles();
+    const photos = files.filter(f => f.type === 'image');
+    
+    if (photos.length === 0) return;
+    
+    currentPhotoIndex += direction;
+    if (currentPhotoIndex < 0) currentPhotoIndex = photos.length - 1;
+    if (currentPhotoIndex >= photos.length) currentPhotoIndex = 0;
+    
+    document.getElementById('current-photo').src = photos[currentPhotoIndex].content;
+}
+
+// --- STICKY NOTES ENGINE ---
+
+// 1. Create a note (either a fresh one or loading a saved one)
+function createStickyNote(text = "", top = "150px", left = "150px") {
+    const id = "note-" + Date.now(); // Unique ID based on timestamp
+    const note = document.createElement('div');
+    note.className = "sticky-note";
+    note.id = id;
+    
+    // Position it exactly where it was saved
+    note.style.top = top;
+    note.style.left = left;
+    note.style.position = "absolute"; 
+    
+    note.innerHTML = `
+        <div class="sticky-header">
+            <span class="close-note" onclick="deleteNote('${id}')" title="Delete note">×</span>
+        </div>
+        <textarea placeholder="Write a note..." oninput="saveNotes()"></textarea>
+    `;
+    
+    document.body.appendChild(note);
+    note.querySelector('textarea').value = text; // Set text after adding to DOM
+    dragElement(note); // Make it draggable
+    saveNotes();       // Save the state
+}
+
+// 2. Delete a note and update storage
+function deleteNote(id) {
+    const note = document.getElementById(id);
+    if (note) {
+        note.remove();
+        saveNotes();
+    }
+}
+
+// 3. Save all notes (text + coordinates) to LocalStorage
+function saveNotes() {
+    const allNotes = [];
+    document.querySelectorAll('.sticky-note').forEach(note => {
+        allNotes.push({
+            text: note.querySelector('textarea').value,
+            top: note.style.top,
+            left: note.style.left
+        });
+    });
+    localStorage.setItem('savedStickyNotes', JSON.stringify(allNotes));
+}
+
+// 4. Load notes on startup
+function loadStickyNotes() {
+    const saved = JSON.parse(localStorage.getItem('savedStickyNotes') || "[]");
+    saved.forEach(noteData => {
+        createStickyNote(noteData.text, noteData.top, noteData.left);
+    });
+}
+
+// 5. Create a new note from desktop icon
+function newStickyNote() {
+    createStickyNote();
 }
 
 // Clock
