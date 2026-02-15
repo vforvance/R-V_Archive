@@ -169,7 +169,7 @@ function createFlyingHearts(startX, startY) {
 function showGlowingText() {
     const textOverlay = document.createElement('div');
     textOverlay.className = 'glowing-text-overlay';
-    textOverlay.innerHTML = 'WHOOOHOO';
+    textOverlay.innerHTML = '☺️☺️😏☺️☺️WHOOHOO☺️☺️😏☺️☺️';
     textOverlay.style.cssText = `
         position: fixed;
         top: 50%;
