@@ -112,7 +112,7 @@ function createFlyingHearts(startX, startY) {
         heart.innerHTML = '❤️';
         
         const angle = (i / heartCount) * Math.PI * 2;
-        const velocity = Math.random() * 200 + 150;
+        const velocity = Math.random() * 300 + 250;
         const duration = 5 + Math.random() * 3;
         
         heart.style.cssText = `
@@ -142,7 +142,7 @@ function createFlyingHearts(startX, startY) {
         rose.innerHTML = '🌹';
         
         const angle = (i / roseCount) * Math.PI * 2;
-        const velocity = Math.random() * 180 + 140;
+        const velocity = Math.random() * 280 + 240;
         const duration = 5.5 + Math.random() * 3;
         
         rose.style.cssText = `
@@ -172,8 +172,8 @@ function animateParticle(element, startX, startY, angle, velocity, duration) {
     let vx = Math.cos(angle) * velocity;
     let vy = Math.sin(angle) * velocity;
     let time = 0;
-    const gravity = 300;
-    const bounce = 0.7;
+    const gravity = 150;
+    const bounce = 0.85;
     
     function updateParticle(timestamp) {
         const deltaTime = 0.016;
@@ -198,9 +198,9 @@ function animateParticle(element, startX, startY, angle, velocity, duration) {
             y = Math.max(0, Math.min(window.innerHeight, y));
         }
         
-        // Apply damping
-        vx *= 0.98;
-        vy *= 0.98;
+        // Apply damping (reduced for longer travel)
+        vx *= 0.992;
+        vy *= 0.992;
         
         element.style.left = x + 'px';
         element.style.top = y + 'px';
