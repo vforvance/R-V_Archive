@@ -206,4 +206,7 @@ body {
 
 .flying-heart {
     filter: drop-shadow(0 0 8px rgba(255, 20, 147, 0.7));
+    position: fixed;
+    pointer-events: none;
+    line-height: 1;
 }

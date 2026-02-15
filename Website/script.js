@@ -114,13 +114,16 @@ function createFlyingHearts() {
             top: ${window.innerHeight + 50}px;
             font-size: ${Math.random() * 30 + 20}px;
             pointer-events: none;
-            z-index: 40000;
+            z-index: 60000;
             opacity: 1;
             animation: heartFly${animationVariation} ${duration}s ease-out forwards;
+            display: block;
         `;
         document.body.appendChild(heart);
         
-        setTimeout(() => heart.remove(), duration * 1000 + 100);
+        setTimeout(() => {
+            if (heart.parentNode) heart.remove();
+        }, duration * 1000 + 100);
     }
 }
 
