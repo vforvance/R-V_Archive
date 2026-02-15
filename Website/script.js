@@ -97,9 +97,13 @@ function showDesktop() {
 let valentineCount = 0; // Track how many times "No" is clicked
 
 /* --- FLYING HEARTS & ROSES CELEBRATION --- */
-function createFlyingHearts() {
+function createFlyingHearts(startX, startY) {
     const heartCount = 90;
     const roseCount = 40;
+    
+    // Default to center if not provided
+    if (!startX) startX = window.innerWidth / 2;
+    if (!startY) startY = window.innerHeight / 2;
     
     // Create hearts
     for (let i = 0; i < heartCount; i++) {
@@ -107,22 +111,24 @@ function createFlyingHearts() {
         heart.className = 'flying-heart';
         heart.innerHTML = '❤️';
         
-        const duration = Math.random() * 2 + 3;
-        const startX = Math.random() * window.innerWidth;
-        const animationVariation = i % 3;
+        const angle = (i / heartCount) * Math.PI * 2;
+        const velocity = Math.random() * 200 + 150;
+        const duration = 5 + Math.random() * 3;
         
         heart.style.cssText = `
             position: fixed;
             left: ${startX}px;
-            top: ${window.innerHeight + 50}px;
+            top: ${startY}px;
             font-size: ${Math.random() * 30 + 20}px;
             pointer-events: none;
             z-index: 60000;
             opacity: 1;
-            animation: heartFly${animationVariation} ${duration}s ease-out forwards;
             display: block;
         `;
         document.body.appendChild(heart);
+        
+        // Animate burst and bounce
+        animateParticle(heart, startX, startY, angle, velocity, duration);
         
         setTimeout(() => {
             if (heart.parentNode) heart.remove();
@@ -135,27 +141,74 @@ function createFlyingHearts() {
         rose.className = 'flying-rose';
         rose.innerHTML = '🌹';
         
-        const duration = Math.random() * 2 + 3.5;
-        const startX = Math.random() * window.innerWidth;
-        const animationVariation = i % 3;
+        const angle = (i / roseCount) * Math.PI * 2;
+        const velocity = Math.random() * 180 + 140;
+        const duration = 5.5 + Math.random() * 3;
         
         rose.style.cssText = `
             position: fixed;
             left: ${startX}px;
-            top: ${window.innerHeight + 50}px;
+            top: ${startY}px;
             font-size: ${Math.random() * 25 + 18}px;
             pointer-events: none;
             z-index: 60001;
             opacity: 1;
-            animation: roseFly${animationVariation} ${duration}s ease-out forwards;
             display: block;
         `;
         document.body.appendChild(rose);
+        
+        // Animate burst and bounce
+        animateParticle(rose, startX, startY, angle, velocity, duration);
         
         setTimeout(() => {
             if (rose.parentNode) rose.remove();
         }, duration * 1000 + 100);
     }
+}
+
+function animateParticle(element, startX, startY, angle, velocity, duration) {
+    let x = startX;
+    let y = startY;
+    let vx = Math.cos(angle) * velocity;
+    let vy = Math.sin(angle) * velocity;
+    let time = 0;
+    const gravity = 300;
+    const bounce = 0.7;
+    
+    function updateParticle(timestamp) {
+        const deltaTime = 0.016;
+        time += deltaTime;
+        
+        if (time > duration) return;
+        
+        // Apply gravity
+        vy += gravity * deltaTime;
+        
+        // Update position
+        x += vx * deltaTime;
+        y += vy * deltaTime;
+        
+        // Boundary bouncing
+        if (x < 0 || x > window.innerWidth) {
+            vx *= -bounce;
+            x = Math.max(0, Math.min(window.innerWidth, x));
+        }
+        if (y < 0 || y > window.innerHeight) {
+            vy *= -bounce;
+            y = Math.max(0, Math.min(window.innerHeight, y));
+        }
+        
+        // Apply damping
+        vx *= 0.98;
+        vy *= 0.98;
+        
+        element.style.left = x + 'px';
+        element.style.top = y + 'px';
+        
+        requestAnimationFrame(updateParticle);
+    }
+    
+    requestAnimationFrame(updateParticle);
 }
 
 function showValentinePrompt() {
@@ -195,7 +248,10 @@ function showValentinePrompt() {
     const noBtn = dialog.querySelector('#val-no');
     
     yesBtn.onclick = () => {
-        createFlyingHearts();
+        const rect = yesBtn.getBoundingClientRect();
+        const startX = rect.left + rect.width / 2;
+        const startY = rect.top + rect.height / 2;
+        createFlyingHearts(startX, startY);
         setTimeout(() => {
             dialog.remove();
             valentineCount = 0;
