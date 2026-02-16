@@ -13,20 +13,38 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // --- GLOBAL STATE ---
-const USERS = { 'Venance': 'letmein', 'Rehema': 'letmein' };
+const USERS = { 'Venance': 'letmein', 'Rehema': '9299' };
 let selectedUser = null;
 let highestZ = 100;
 
 let photoGallery = [];
 let currentPhotoIndex = 0;
-
 let envelopeAnimating = false;
 
-// No-button roaming state
-let noBtnRoaming = false;
-let noBtnRAF = null;
-let noBtnX = 0, noBtnY = 0;
-let noBtnVX = 0, noBtnVY = 0;
+// No-button roaming
+let noBtnRoaming = false, noBtnRAF = null;
+let noBtnX = 0, noBtnY = 0, noBtnVX = 0, noBtnVY = 0;
+
+// Minimized windows registry { windowId -> { label, icon } }
+const minimizedWindows = {};
+
+// Window icons map for taskbar buttons
+const WINDOW_ICONS = {
+    'calendar-window': 'https://win98icons.alexmeub.com/icons/png/calendar-0.png',
+    'files-window':    'https://win98icons.alexmeub.com/icons/png/search_directory-0.png',
+    'paint-window':    'https://win98icons.alexmeub.com/icons/png/paint_file-5.png',
+    'bored-window':    'https://win98icons.alexmeub.com/icons/png/joystick-0.png',
+    'settings-window': 'https://win98icons.alexmeub.com/icons/png/settings_gear-0.png',
+    'music-window':    'https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png',
+    'photos-window':   'https://win98icons.alexmeub.com/icons/png/camera3-2.png',
+    'poetry-window':   'https://win98icons.alexmeub.com/icons/png/notepad-2.png',
+};
+
+// Avatar state
+const AVATAR_EMOJIS = { 'Venance': '👨🏾', 'Rehema': '👩🏾‍🦱' };
+const avatarState = {}; // keyed by username
+let avatarRAF = null;
+let myPresenceRef = null;
 
 
 // ================================================================
@@ -44,16 +62,10 @@ function initSystem() {
 
 function runBootSequence() {
     const bootLines = document.getElementById('boot-lines');
-    const lines = [
-        "BIOS Date 02/14/98 12:00:00 Ver: 1.0.0",
-        "CPU: Pentium II 333MHz",
-        "64MB RAM System OK",
-        "Starting Windows 98..."
-    ];
+    const lines = ["BIOS Date 02/14/98 12:00:00 Ver: 1.0.0","CPU: Pentium II 333MHz","64MB RAM System OK","Starting Windows 98..."];
     let i = 0;
     const interval = setInterval(() => {
-        bootLines.innerText += lines[i] + "\n";
-        i++;
+        bootLines.innerText += lines[i] + "\n"; i++;
         if (i >= lines.length) { clearInterval(interval); setTimeout(showLoginScreen, 1000); }
     }, 500);
 }
@@ -87,10 +99,10 @@ function goBackToUserSelect() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const loginOkBtn = document.getElementById('btn-login-ok');
-    if (loginOkBtn) loginOkBtn.addEventListener('click', attemptLogin);
-    const passInput = document.getElementById('login-pass');
-    if (passInput) passInput.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+    const btn = document.getElementById('btn-login-ok');
+    if (btn) btn.addEventListener('click', attemptLogin);
+    const inp = document.getElementById('login-pass');
+    if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
 });
 
 function attemptLogin() {
@@ -106,6 +118,7 @@ function attemptLogin() {
 }
 
 function logout() {
+    if (myPresenceRef) myPresenceRef.remove();
     localStorage.removeItem('isLoggedIn');
     location.reload();
 }
@@ -121,19 +134,20 @@ function showDesktop() {
     setInterval(updateClock, 1000);
 
     initDraggableWindows();
-
     listenForSharedFiles();
     listenForStickyNotes();
     listenForCalendar();
     listenForWallpaper();
     listenForPhotos();
+    initPresence();
+    listenForAvatars();
 
     setTimeout(showEnvelopeOverlay, 1000);
 }
 
 
 // ================================================================
-//  3. DRAGGABLE WINDOWS — mouse + touch
+//  3. DRAGGABLE WINDOWS
 // ================================================================
 function initDraggableWindows() {
     document.querySelectorAll('.draggable').forEach(win => {
@@ -147,42 +161,39 @@ function initDraggableWindows() {
     });
 }
 
-function bringToFront(win) {
-    highestZ++;
-    win.style.zIndex = highestZ;
-}
+function bringToFront(win) { highestZ++; win.style.zIndex = highestZ; }
 
 function dragWindowStart(e, win) {
-    if (e.target.closest('button[aria-label="Close"]')) return;
+    if (e.target.closest('.title-bar-controls')) return;
     e.preventDefault();
     const shiftX = e.clientX - win.getBoundingClientRect().left;
     const shiftY = e.clientY - win.getBoundingClientRect().top;
-    function onMouseMove(e) {
-        win.style.left = Math.max(0, Math.min(e.pageX - shiftX, window.innerWidth  - win.offsetWidth))  + 'px';
+    function onMove(e) {
+        win.style.left = Math.max(0, Math.min(e.pageX - shiftX, window.innerWidth  - win.offsetWidth)) + 'px';
         win.style.top  = Math.max(0, Math.min(e.pageY - shiftY, window.innerHeight - win.offsetHeight - 30)) + 'px';
     }
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', function cleanup() {
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', cleanup);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', function c() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', c);
     });
 }
 
 function dragWindowTouchStart(e, win) {
-    if (e.target.closest('button[aria-label="Close"]')) return;
+    if (e.target.closest('.title-bar-controls')) return;
     e.preventDefault();
-    const touch = e.touches[0];
-    const shiftX = touch.clientX - win.getBoundingClientRect().left;
-    const shiftY = touch.clientY - win.getBoundingClientRect().top;
-    function onTouchMove(e) {
+    const t = e.touches[0];
+    const shiftX = t.clientX - win.getBoundingClientRect().left;
+    const shiftY = t.clientY - win.getBoundingClientRect().top;
+    function onMove(e) {
         const t = e.touches[0];
-        win.style.left = Math.max(0, Math.min(t.clientX - shiftX, window.innerWidth  - win.offsetWidth))  + 'px';
+        win.style.left = Math.max(0, Math.min(t.clientX - shiftX, window.innerWidth  - win.offsetWidth)) + 'px';
         win.style.top  = Math.max(0, Math.min(t.clientY - shiftY, window.innerHeight - win.offsetHeight - 30)) + 'px';
     }
-    document.addEventListener('touchmove', onTouchMove, { passive: false });
-    document.addEventListener('touchend', function cleanup() {
-        document.removeEventListener('touchmove', onTouchMove);
-        document.removeEventListener('touchend', cleanup);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', function c() {
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', c);
     });
 }
 
@@ -194,7 +205,49 @@ function handleIconTouch(e, windowId, fn) {
 
 
 // ================================================================
-//  4. ENVELOPE — Win98 overlay, letter slides out
+//  4. MINIMIZE / RESTORE — taskbar window buttons
+// ================================================================
+function minimizeWindow(id, label) {
+    const win = document.getElementById(id);
+    if (!win) return;
+    win.style.display = 'none';
+    minimizedWindows[id] = { label, icon: WINDOW_ICONS[id] || '' };
+    renderTaskbarWindows();
+}
+
+function restoreWindow(id) {
+    const win = document.getElementById(id);
+    if (!win) return;
+    win.style.display = 'block';
+    delete minimizedWindows[id];
+    bringToFront(win);
+    renderTaskbarWindows();
+    // Clamp to viewport
+    requestAnimationFrame(() => {
+        const rect = win.getBoundingClientRect();
+        if (rect.right  > window.innerWidth)  win.style.left = Math.max(0, window.innerWidth  - win.offsetWidth  - 10) + 'px';
+        if (rect.bottom > window.innerHeight - 30) win.style.top  = Math.max(0, window.innerHeight - win.offsetHeight - 36) + 'px';
+        if (rect.left < 0) win.style.left = '4px';
+        if (rect.top  < 0) win.style.top  = '4px';
+    });
+}
+
+function renderTaskbarWindows() {
+    const bar = document.getElementById('taskbar-windows');
+    bar.innerHTML = '';
+    Object.entries(minimizedWindows).forEach(([id, info]) => {
+        const btn = document.createElement('button');
+        btn.className = 'taskbar-win-btn';
+        btn.title = info.label;
+        btn.innerHTML = info.icon ? `<img src="${info.icon}"> ${info.label}` : info.label;
+        btn.onclick = () => restoreWindow(id);
+        bar.appendChild(btn);
+    });
+}
+
+
+// ================================================================
+//  5. ENVELOPE
 // ================================================================
 function showEnvelopeOverlay() {
     envelopeAnimating = false;
@@ -207,8 +260,7 @@ function showEnvelopeOverlay() {
 function openEnvelopeLetter() {
     if (envelopeAnimating) return;
     envelopeAnimating = true;
-    const envEl = document.getElementById('env-win98-el');
-    envEl.classList.add('is-open');
+    document.getElementById('env-win98-el').classList.add('is-open');
     setTimeout(() => {
         document.getElementById('envelope-overlay').style.display = 'none';
         envelopeAnimating = false;
@@ -216,9 +268,7 @@ function openEnvelopeLetter() {
     }, 1500);
 }
 
-function triggerEnvelopeSequence() {
-    showEnvelopeOverlay();
-}
+function triggerEnvelopeSequence() { showEnvelopeOverlay(); }
 
 function revealDesktopEnvelopeIcon() {
     document.getElementById('envelope-desktop-icon').style.display = 'flex';
@@ -227,37 +277,26 @@ function revealDesktopEnvelopeIcon() {
 
 
 // ================================================================
-//  5. VALENTINE PROMPT — letter dialog, No button roams entire screen
+//  6. VALENTINE PROMPT — No button roams entire screen
 // ================================================================
 function showValentinePrompt() {
     const dialog = document.createElement('div');
     dialog.className = 'window valentine-dialog';
     dialog.id = 'valentine-dialog-el';
-    dialog.style.cssText = `
-        position: fixed;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        width: min(320px, 90vw);
-        z-index: 50000;
-    `;
+    dialog.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(320px,90vw);z-index:50000;';
     dialog.innerHTML = `
         <div class="title-bar"><div class="title-bar-text">❤️ You've Got Mail!</div></div>
-        <div class="window-body" style="text-align:center; padding:10px;">
-            <div style="font-size:48px; margin:6px 0;">❤️</div>
-            <p style="font-family:'Comic Sans MS',cursive; margin:6px 0 14px; color:#880e4f;">Will you be my Valentine?</p>
-            <div style="display:flex; gap:12px; justify-content:center; margin-top:10px;">
+        <div class="window-body" style="text-align:center;padding:10px;">
+            <div style="font-size:48px;margin:6px 0;">❤️</div>
+            <p style="font-family:'cursive',cursive;margin:6px 0 14px;color:#880e4f;">Will you be my Valentine?</p>
+            <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;">
                 <button id="val-yes" class="valentine-yes">Yes ❤️</button>
                 <button id="val-no"  class="valentine-no">No</button>
             </div>
-        </div>
-    `;
+        </div>`;
     document.body.appendChild(dialog);
 
-    const yesBtn = dialog.querySelector('#val-yes');
-    const noBtn  = dialog.querySelector('#val-no');
-
-    // YES — celebrate and reveal envelope icon
-    yesBtn.onclick = () => {
+    dialog.querySelector('#val-yes').onclick = () => {
         stopNoBtnRoam();
         createFlyingHearts();
         showGlowingText();
@@ -265,197 +304,106 @@ function showValentinePrompt() {
         revealDesktopEnvelopeIcon();
     };
 
-    // NO — launch the button into free-roaming mode across the whole screen
-    // Give it a tiny delay so it's rendered first
-    setTimeout(() => startNoBtnRoam(noBtn), 100);
+    setTimeout(() => startNoBtnRoam(dialog.querySelector('#val-no')), 100);
 }
 
-
-// ================================================================
-//  5a. NO BUTTON — free-roaming physics across entire viewport
-// ================================================================
 function startNoBtnRoam(btn) {
     if (noBtnRoaming) return;
     noBtnRoaming = true;
-
-    // Detach from dialog, place on body so it can go anywhere
     document.body.appendChild(btn);
-    btn.style.position   = 'fixed';
-    btn.style.zIndex     = '99999';
-    btn.style.transition = 'none'; // we drive position manually
+    btn.style.position = 'fixed';
+    btn.style.zIndex   = '99999';
+    btn.style.transition = 'none';
 
-    // Start near centre
-    noBtnX  = window.innerWidth  / 2 - 30;
-    noBtnY  = window.innerHeight / 2 + 40;
-
-    // Random initial velocity
-    const speed = 3;
+    noBtnX = window.innerWidth / 2 - 30;
+    noBtnY = window.innerHeight / 2 + 40;
     const angle = Math.random() * Math.PI * 2;
-    noBtnVX = Math.cos(angle) * speed;
-    noBtnVY = Math.sin(angle) * speed;
-
+    noBtnVX = Math.cos(angle) * 3;
+    noBtnVY = Math.sin(angle) * 3;
     btn.style.left = noBtnX + 'px';
     btn.style.top  = noBtnY + 'px';
 
-    // Cursor flee radius
     let cursorX = -999, cursorY = -999;
+    function onMM(e) { cursorX = e.clientX; cursorY = e.clientY; }
+    function onTM(e) { cursorX = e.touches[0].clientX; cursorY = e.touches[0].clientY; }
+    document.addEventListener('mousemove', onMM);
+    document.addEventListener('touchmove', onTM, { passive: true });
+    btn._cleanup = () => { document.removeEventListener('mousemove', onMM); document.removeEventListener('touchmove', onTM); };
 
-    function onMouseMove(e) { cursorX = e.clientX; cursorY = e.clientY; }
-    function onTouchMove(e) { cursorX = e.touches[0].clientX; cursorY = e.touches[0].clientY; }
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('touchmove', onTouchMove, { passive: true });
-
-    // Store cleanup refs on the button itself
-    btn._cleanup = () => {
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('touchmove', onTouchMove);
-    };
-
-    const FLEE_RADIUS = 120;   // px — how close cursor needs to be to spook it
-    const FLEE_FORCE  = 8;     // how hard it runs away
-    const MAX_SPEED   = 14;    // terminal velocity
-    const FRICTION    = 0.985; // slight slowdown each frame
-    const TASKBAR_H   = 30;    // keep above taskbar
-
-    function roamLoop() {
+    function loop() {
         if (!noBtnRoaming) return;
-
-        const bw = btn.offsetWidth  || 60;
-        const bh = btn.offsetHeight || 24;
-
-        // Flee from cursor
-        const dx = noBtnX + bw / 2 - cursorX;
-        const dy = noBtnY + bh / 2 - cursorY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < FLEE_RADIUS && dist > 0) {
-            // Push away from cursor proportional to closeness
-            const force = (FLEE_RADIUS - dist) / FLEE_RADIUS * FLEE_FORCE;
-            noBtnVX += (dx / dist) * force;
-            noBtnVY += (dy / dist) * force;
+        const bw = btn.offsetWidth || 60, bh = btn.offsetHeight || 24;
+        const dx = noBtnX + bw/2 - cursorX, dy = noBtnY + bh/2 - cursorY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 120 && dist > 0) {
+            const f = (120 - dist) / 120 * 8;
+            noBtnVX += (dx/dist)*f; noBtnVY += (dy/dist)*f;
         }
-
-        // Apply friction
-        noBtnVX *= FRICTION;
-        noBtnVY *= FRICTION;
-
-        // Clamp to max speed
-        const spd = Math.sqrt(noBtnVX * noBtnVX + noBtnVY * noBtnVY);
-        if (spd > MAX_SPEED) {
-            noBtnVX = (noBtnVX / spd) * MAX_SPEED;
-            noBtnVY = (noBtnVY / spd) * MAX_SPEED;
-        }
-
-        // Ensure it's always moving a little (minimum drift)
-        const minSpeed = 1.2;
-        if (spd < minSpeed) {
-            const a = Math.random() * Math.PI * 2;
-            noBtnVX += Math.cos(a) * minSpeed;
-            noBtnVY += Math.sin(a) * minSpeed;
-        }
-
-        // Move
-        noBtnX += noBtnVX;
-        noBtnY += noBtnVY;
-
-        // Bounce off viewport walls
-        if (noBtnX < 0) {
-            noBtnX  = 0;
-            noBtnVX = Math.abs(noBtnVX) * 0.9;
-        }
-        if (noBtnX + bw > window.innerWidth) {
-            noBtnX  = window.innerWidth - bw;
-            noBtnVX = -Math.abs(noBtnVX) * 0.9;
-        }
-        if (noBtnY < 0) {
-            noBtnY  = 0;
-            noBtnVY = Math.abs(noBtnVY) * 0.9;
-        }
-        if (noBtnY + bh > window.innerHeight - TASKBAR_H) {
-            noBtnY  = window.innerHeight - TASKBAR_H - bh;
-            noBtnVY = -Math.abs(noBtnVY) * 0.9;
-        }
-
+        noBtnVX *= 0.985; noBtnVY *= 0.985;
+        const spd = Math.sqrt(noBtnVX*noBtnVX + noBtnVY*noBtnVY);
+        if (spd > 14) { noBtnVX = noBtnVX/spd*14; noBtnVY = noBtnVY/spd*14; }
+        if (spd < 1.2) { const a = Math.random()*Math.PI*2; noBtnVX += Math.cos(a)*1.2; noBtnVY += Math.sin(a)*1.2; }
+        noBtnX += noBtnVX; noBtnY += noBtnVY;
+        if (noBtnX < 0)                       { noBtnX = 0;                             noBtnVX = Math.abs(noBtnVX)*0.9; }
+        if (noBtnX + bw > window.innerWidth)  { noBtnX = window.innerWidth - bw;        noBtnVX = -Math.abs(noBtnVX)*0.9; }
+        if (noBtnY < 0)                       { noBtnY = 0;                             noBtnVY = Math.abs(noBtnVY)*0.9; }
+        if (noBtnY + bh > window.innerHeight - 30) { noBtnY = window.innerHeight-30-bh; noBtnVY = -Math.abs(noBtnVY)*0.9; }
         btn.style.left = noBtnX + 'px';
         btn.style.top  = noBtnY + 'px';
-
-        noBtnRAF = requestAnimationFrame(roamLoop);
+        noBtnRAF = requestAnimationFrame(loop);
     }
-
-    noBtnRAF = requestAnimationFrame(roamLoop);
+    noBtnRAF = requestAnimationFrame(loop);
 }
 
 function stopNoBtnRoam() {
     noBtnRoaming = false;
     if (noBtnRAF) { cancelAnimationFrame(noBtnRAF); noBtnRAF = null; }
     const btn = document.getElementById('val-no');
-    if (btn) {
-        if (btn._cleanup) btn._cleanup();
-        btn.remove();
-    }
+    if (btn) { if (btn._cleanup) btn._cleanup(); btn.remove(); }
 }
 
 
 // ================================================================
-//  6. CALENDAR (Firebase)
+//  7. CALENDAR (Firebase)
 // ================================================================
 function listenForCalendar() {
-    db.ref('calendar').on('value', snapshot => {
-        renderCalendarEvents(snapshot.val() || {});
-    });
+    db.ref('calendar').on('value', s => renderCalendarEvents(s.val() || {}));
 }
-
 function addCalendarEvent() {
-    const dateVal = document.getElementById('cal-date').value;
-    const descVal = document.getElementById('cal-desc').value;
-    if (!dateVal || !descVal) { alert("Please enter a date and a description!"); return; }
+    const d = document.getElementById('cal-date').value, desc = document.getElementById('cal-desc').value;
+    if (!d || !desc) { alert("Please enter a date and description!"); return; }
     const ref = db.ref('calendar').push();
-    ref.set({ id: ref.key, date: dateVal, description: descVal, author: localStorage.getItem('activeUser') });
+    ref.set({ id: ref.key, date: d, description: desc, author: localStorage.getItem('activeUser') });
     document.getElementById('cal-date').value = '';
     document.getElementById('cal-desc').value = '';
 }
-
-function renderCalendarEvents(eventsObj) {
+function renderCalendarEvents(obj) {
     const list = document.getElementById('calendar-list');
     list.innerHTML = '';
-    Object.values(eventsObj)
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
-        .forEach(ev => {
-            const item = document.createElement('div');
-            item.className = 'calendar-event';
-            item.innerHTML = `
-                <div><strong>${ev.date}:</strong> ${ev.description}
-                <em style="color:#888;font-size:10px;"> (${ev.author || ''})</em></div>
-                <button onclick="deleteCalendarEvent('${ev.id}')" style="min-width:20px;padding:0 5px;">x</button>
-            `;
-            list.appendChild(item);
-        });
-}
-
-function deleteCalendarEvent(id) {
-    if (confirm("Delete this event?")) db.ref(`calendar/${id}`).remove();
-}
-
-
-// ================================================================
-//  7. SHARED FILES (Firebase)
-// ================================================================
-function listenForSharedFiles() {
-    db.ref('sharedFiles').on('value', snapshot => {
-        renderFiles(Object.values(snapshot.val() || {}));
+    Object.values(obj).sort((a,b) => new Date(a.date)-new Date(b.date)).forEach(ev => {
+        const item = document.createElement('div');
+        item.className = 'calendar-event';
+        item.innerHTML = `<div><strong>${ev.date}:</strong> ${ev.description} <em style="color:#888;font-size:10px;">(${ev.author||''})</em></div><button onclick="deleteCalendarEvent('${ev.id}')" style="min-width:20px;padding:0 5px;">x</button>`;
+        list.appendChild(item);
     });
 }
+function deleteCalendarEvent(id) { if (confirm("Delete this event?")) db.ref(`calendar/${id}`).remove(); }
 
+
+// ================================================================
+//  8. SHARED FILES (Firebase)
+// ================================================================
+function listenForSharedFiles() {
+    db.ref('sharedFiles').on('value', s => renderFiles(Object.values(s.val() || {})));
+}
 function createNewFile() {
     const name = prompt("Enter file name:", "New Note.txt");
     if (!name) return;
     const ref = db.ref('sharedFiles').push();
     ref.set({ id: ref.key, name, type: 'text', content: '', author: localStorage.getItem('activeUser'), timestamp: Date.now() });
 }
-
 function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+    const file = event.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = e => {
         const ref = db.ref('sharedFiles').push();
@@ -463,40 +411,33 @@ function handleFileUpload(event) {
     };
     reader.readAsDataURL(file);
 }
-
 function renderFiles(files) {
-    const container = document.getElementById('file-list');
-    if (!container) return;
-    container.innerHTML = '';
+    const c = document.getElementById('file-list'); if (!c) return;
+    c.innerHTML = '';
     files.forEach(file => {
         const div = document.createElement('div');
         div.className = 'file-item';
-        const iconSrc = file.type === 'image'
-            ? 'https://win98icons.alexmeub.com/icons/png/image_gif-0.png'
-            : 'https://win98icons.alexmeub.com/icons/png/notepad_file-2.png';
-        div.innerHTML = `<img src="${iconSrc}"><span>${file.name}</span>`;
+        div.innerHTML = `<img src="${file.type==='image'?'https://win98icons.alexmeub.com/icons/png/image_gif-0.png':'https://win98icons.alexmeub.com/icons/png/notepad_file-2.png'}"><span>${file.name}</span>`;
         div.ondblclick = () => openFile(file);
         div.addEventListener('touchend', e => { e.preventDefault(); openFile(file); });
-        div.oncontextmenu = e => {
-            e.preventDefault();
-            if (confirm(`Delete ${file.name} for everyone?`)) db.ref(`sharedFiles/${file.id}`).remove();
-        };
-        container.appendChild(div);
+        div.oncontextmenu = e => { e.preventDefault(); if (confirm(`Delete ${file.name} for everyone?`)) db.ref(`sharedFiles/${file.id}`).remove(); };
+        c.appendChild(div);
     });
 }
-
 function openFile(file) {
     if (file.type === 'text') {
         openWindow('poetry-window');
         const ta = document.getElementById('notepad-content');
-        ta.value = file.content;
-        ta.dataset.currentFileId = file.id;
+        // Only set content if this is a different file than what's currently open
+        if (ta.dataset.currentFileId !== file.id) {
+            ta.value = file.content;
+            ta.dataset.currentFileId = file.id;
+        }
     } else if (file.type === 'image') {
         openWindow('photos-window');
         document.getElementById('current-photo').src = file.content;
     }
 }
-
 function saveCurrentNotepad() {
     const ta = document.getElementById('notepad-content');
     const id = ta.dataset.currentFileId;
@@ -504,71 +445,100 @@ function saveCurrentNotepad() {
         db.ref(`sharedFiles/${id}`).update({ content: ta.value, lastUpdated: Date.now(), lastUpdatedBy: localStorage.getItem('activeUser') });
         alert("File updated for both users!");
     } else {
-        const name = prompt("Save as:", "Letter.txt");
-        if (!name) return;
+        const name = prompt("Save as:", "Letter.txt"); if (!name) return;
         const ref = db.ref('sharedFiles').push();
         ref.set({ id: ref.key, name, type: 'text', content: ta.value, author: localStorage.getItem('activeUser'), timestamp: Date.now() })
            .then(() => { ta.dataset.currentFileId = ref.key; alert("File saved for both users!"); });
     }
 }
-
-function clearAllFiles() {
-    if (confirm("Format Disk? This deletes EVERYTHING in the cloud.")) db.ref('sharedFiles').remove();
-}
+function clearAllFiles() { if (confirm("Format Disk? This deletes EVERYTHING in the cloud.")) db.ref('sharedFiles').remove(); }
 
 
 // ================================================================
-//  8. STICKY NOTES (Firebase)
+//  9. STICKY NOTES — debounced DB sync so typing never stutters
 // ================================================================
+
+// Per-note debounce timers
+const _noteDebounceTimers = {};
+
 function listenForStickyNotes() {
     db.ref('stickyNotes').on('value', snapshot => {
-        document.querySelectorAll('.sticky-note').forEach(n => n.remove());
-        Object.values(snapshot.val() || {}).forEach(createStickyNoteElement);
+        const notes = snapshot.val() || {};
+
+        // For each note in DB, either update its textarea (if it's NOT focused) or create it
+        Object.values(notes).forEach(note => {
+            const existing = document.querySelector(`.sticky-note[data-note-id="${note.id}"]`);
+            if (existing) {
+                const ta = existing.querySelector('textarea');
+                // Only update the textarea if the user isn't currently typing into it
+                if (document.activeElement !== ta) {
+                    ta.value = note.text || '';
+                }
+                // Update position only if not being dragged (check inline style change)
+                // We skip position update for existing notes to avoid jank
+            } else {
+                createStickyNoteElement(note);
+            }
+        });
+
+        // Remove any notes deleted from DB
+        document.querySelectorAll('.sticky-note').forEach(el => {
+            if (!notes[el.dataset.noteId]) el.remove();
+        });
     });
 }
 
 function newStickyNote() {
     const ref = db.ref('stickyNotes').push();
-    ref.set({ id: ref.key, text: '', x: 150 + Math.random() * 100, y: 100 + Math.random() * 100, author: localStorage.getItem('activeUser'), timestamp: Date.now() });
+    ref.set({ id: ref.key, text: '', x: 150 + Math.random()*100, y: 100 + Math.random()*100, author: localStorage.getItem('activeUser'), timestamp: Date.now() });
 }
 
 function createStickyNoteElement(note) {
     const el = document.createElement('div');
     el.className = 'sticky-note';
     el.dataset.noteId = note.id;
-    el.style.left = Math.max(0, Math.min(note.x || 150, window.innerWidth  - 170)) + 'px';
-    el.style.top  = Math.max(0, Math.min(note.y || 100, window.innerHeight - 180)) + 'px';
+    el.style.left = Math.max(0, Math.min(note.x||150, window.innerWidth -170)) + 'px';
+    el.style.top  = Math.max(0, Math.min(note.y||100, window.innerHeight-180)) + 'px';
     el.style.zIndex = ++highestZ;
     el.innerHTML = `
         <div class="sticky-header" data-note-id="${note.id}">
             <span class="close-note" onclick="deleteNote('${note.id}')">×</span>
         </div>
-        <textarea oninput="updateNoteText('${note.id}', this.value)">${note.text || ''}</textarea>
-    `;
+        <textarea placeholder="Type here...">${note.text||''}</textarea>`;
+    const ta = el.querySelector('textarea');
+
+    // DEBOUNCED INPUT — user types freely, DB gets updated 600ms after they stop
+    ta.addEventListener('input', () => {
+        clearTimeout(_noteDebounceTimers[note.id]);
+        _noteDebounceTimers[note.id] = setTimeout(() => {
+            db.ref(`stickyNotes/${note.id}`).update({ text: ta.value });
+        }, 600);
+    });
+
     const header = el.querySelector('.sticky-header');
     header.addEventListener('mousedown', e => dragNoteStart(e, note.id));
     header.addEventListener('touchstart', e => dragNoteTouchStart(e, note.id), { passive: false });
     document.body.appendChild(el);
 }
 
-function updateNoteText(id, text) { db.ref(`stickyNotes/${id}`).update({ text }); }
-function deleteNote(id)           { db.ref(`stickyNotes/${id}`).remove(); }
+function deleteNote(id) {
+    clearTimeout(_noteDebounceTimers[id]);
+    db.ref(`stickyNotes/${id}`).remove();
+}
 
 function dragNoteStart(e, id) {
     if (e.target.classList.contains('close-note')) return;
-    const note = document.querySelector(`.sticky-note[data-note-id="${id}"]`);
-    if (!note) return;
+    const note = document.querySelector(`.sticky-note[data-note-id="${id}"]`); if (!note) return;
     note.style.zIndex = ++highestZ;
-    const shiftX = e.clientX - note.getBoundingClientRect().left;
-    const shiftY = e.clientY - note.getBoundingClientRect().top;
+    const sx = e.clientX - note.getBoundingClientRect().left, sy = e.clientY - note.getBoundingClientRect().top;
     function onMove(e) {
-        note.style.left = Math.max(0, Math.min(e.pageX - shiftX, window.innerWidth  - note.offsetWidth))  + 'px';
-        note.style.top  = Math.max(0, Math.min(e.pageY - shiftY, window.innerHeight - note.offsetHeight - 30)) + 'px';
+        note.style.left = Math.max(0, Math.min(e.pageX-sx, window.innerWidth -note.offsetWidth)) +'px';
+        note.style.top  = Math.max(0, Math.min(e.pageY-sy, window.innerHeight-note.offsetHeight-30))+'px';
     }
     document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', function cleanup() {
+    document.addEventListener('mouseup', function c() {
         document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', cleanup);
+        document.removeEventListener('mouseup', c);
         db.ref(`stickyNotes/${id}`).update({ x: parseInt(note.style.left), y: parseInt(note.style.top) });
     });
 }
@@ -576,232 +546,320 @@ function dragNoteStart(e, id) {
 function dragNoteTouchStart(e, id) {
     if (e.target.classList.contains('close-note')) return;
     e.preventDefault();
-    const note = document.querySelector(`.sticky-note[data-note-id="${id}"]`);
-    if (!note) return;
+    const note = document.querySelector(`.sticky-note[data-note-id="${id}"]`); if (!note) return;
     note.style.zIndex = ++highestZ;
     const t = e.touches[0];
-    const shiftX = t.clientX - note.getBoundingClientRect().left;
-    const shiftY = t.clientY - note.getBoundingClientRect().top;
+    const sx = t.clientX - note.getBoundingClientRect().left, sy = t.clientY - note.getBoundingClientRect().top;
     function onMove(e) {
         const t = e.touches[0];
-        note.style.left = Math.max(0, Math.min(t.clientX - shiftX, window.innerWidth  - note.offsetWidth))  + 'px';
-        note.style.top  = Math.max(0, Math.min(t.clientY - shiftY, window.innerHeight - note.offsetHeight - 30)) + 'px';
+        note.style.left = Math.max(0, Math.min(t.clientX-sx, window.innerWidth -note.offsetWidth)) +'px';
+        note.style.top  = Math.max(0, Math.min(t.clientY-sy, window.innerHeight-note.offsetHeight-30))+'px';
     }
     document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('touchend', function cleanup() {
+    document.addEventListener('touchend', function c() {
         document.removeEventListener('touchmove', onMove);
-        document.removeEventListener('touchend', cleanup);
+        document.removeEventListener('touchend', c);
         db.ref(`stickyNotes/${id}`).update({ x: parseInt(note.style.left), y: parseInt(note.style.top) });
     });
 }
 
 
 // ================================================================
-//  9. PHOTO GALLERY (Firebase — multiple photos)
+//  10. PHOTO GALLERY (Firebase)
 // ================================================================
 function listenForPhotos() {
-    db.ref('photoGallery').on('value', snapshot => {
-        const data = snapshot.val() || {};
-        photoGallery = Object.values(data).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-        if (photoGallery.length === 0) {
-            photoGallery = [{ id: 'default', name: 'Default', src: 'pictures/Gemini_Generated_Image_5jaj355jaj355jaj.png', timestamp: 0 }];
-        }
-        currentPhotoIndex = Math.min(currentPhotoIndex, photoGallery.length - 1);
+    db.ref('photoGallery').on('value', s => {
+        const data = s.val() || {};
+        photoGallery = Object.values(data).sort((a,b)=>(a.timestamp||0)-(b.timestamp||0));
+        if (!photoGallery.length) photoGallery = [{ id:'default', name:'Default', src:'pictures/Gemini_Generated_Image_5jaj355jaj355jaj.png', timestamp:0 }];
+        currentPhotoIndex = Math.min(currentPhotoIndex, photoGallery.length-1);
         renderPhotoViewer();
     });
 }
-
 function addPhotosToGallery(event) {
     Array.from(event.target.files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = e => {
-            const ref = db.ref('photoGallery').push();
-            ref.set({ id: ref.key, name: file.name, src: e.target.result, addedBy: localStorage.getItem('activeUser'), timestamp: Date.now() });
-        };
-        reader.readAsDataURL(file);
+        const r = new FileReader();
+        r.onload = e => { const ref = db.ref('photoGallery').push(); ref.set({ id:ref.key, name:file.name, src:e.target.result, addedBy:localStorage.getItem('activeUser'), timestamp:Date.now() }); };
+        r.readAsDataURL(file);
     });
     event.target.value = '';
 }
-
 function deleteCurrentPhoto() {
-    if (photoGallery.length === 0) return;
-    const photo = photoGallery[currentPhotoIndex];
-    if (photo.id === 'default') { alert("Can't delete the default photo."); return; }
-    if (!confirm(`Delete "${photo.name}"?`)) return;
-    db.ref(`photoGallery/${photo.id}`).remove();
-    if (currentPhotoIndex >= photoGallery.length - 1) currentPhotoIndex = Math.max(0, currentPhotoIndex - 1);
+    if (!photoGallery.length) return;
+    const p = photoGallery[currentPhotoIndex];
+    if (p.id === 'default') { alert("Can't delete the default photo."); return; }
+    if (!confirm(`Delete "${p.name}"?`)) return;
+    db.ref(`photoGallery/${p.id}`).remove();
+    if (currentPhotoIndex >= photoGallery.length-1) currentPhotoIndex = Math.max(0, currentPhotoIndex-1);
 }
-
-function changePhoto(direction) {
-    if (photoGallery.length === 0) return;
-    currentPhotoIndex = (currentPhotoIndex + direction + photoGallery.length) % photoGallery.length;
+function changePhoto(dir) {
+    if (!photoGallery.length) return;
+    currentPhotoIndex = (currentPhotoIndex+dir+photoGallery.length) % photoGallery.length;
     renderPhotoViewer();
 }
-
 function renderPhotoViewer() {
-    const img     = document.getElementById('current-photo');
-    const noMsg   = document.getElementById('no-photos-msg');
+    const img = document.getElementById('current-photo');
+    const noMsg = document.getElementById('no-photos-msg');
     const counter = document.getElementById('photo-counter');
-    const thumbs  = document.getElementById('photo-thumbs');
+    const thumbs = document.getElementById('photo-thumbs');
     if (!img) return;
-
-    if (photoGallery.length === 0) {
-        img.style.display = 'none';
-        noMsg.style.display = 'block';
-        counter.innerText = '0 photos';
-        thumbs.innerHTML = '';
-        return;
-    }
-
-    img.style.display = 'block';
-    noMsg.style.display = 'none';
+    if (!photoGallery.length) { img.style.display='none'; noMsg.style.display='block'; counter.innerText='0 photos'; thumbs.innerHTML=''; return; }
+    img.style.display='block'; noMsg.style.display='none';
     img.src = photoGallery[currentPhotoIndex].src;
-    counter.innerText = `${currentPhotoIndex + 1} / ${photoGallery.length}`;
-
+    counter.innerText = `${currentPhotoIndex+1} / ${photoGallery.length}`;
     thumbs.innerHTML = '';
-    photoGallery.forEach((photo, idx) => {
+    photoGallery.forEach((p,i) => {
         const t = document.createElement('img');
-        t.src = photo.src;
-        t.title = photo.name;
-        t.className = idx === currentPhotoIndex ? 'active-thumb' : '';
-        t.onclick = () => { currentPhotoIndex = idx; renderPhotoViewer(); };
+        t.src = p.src; t.title = p.name;
+        t.className = i===currentPhotoIndex ? 'active-thumb' : '';
+        t.onclick = () => { currentPhotoIndex=i; renderPhotoViewer(); };
         thumbs.appendChild(t);
     });
 }
 
 
 // ================================================================
-//  10. WALLPAPER — saved to Firebase, synced for all users
+//  11. WALLPAPER (Firebase — synced)
 // ================================================================
 function listenForWallpaper() {
-    db.ref('wallpaper').on('value', snapshot => {
-        const data = snapshot.val();
-        const body = document.getElementById('desktop-bg');
-        if (data && data.src) {
-            body.style.backgroundImage = `url('${data.src}')`;
-            body.style.backgroundSize = 'cover';
-            body.style.backgroundPosition = 'center';
-        } else {
-            body.style.backgroundImage = "url('https://win98icons.alexmeub.com/images/clouds-wallpaper.jpg')";
-            body.style.backgroundSize = 'cover';
+    db.ref('wallpaper').on('value', s => {
+        const d = s.val(), body = document.getElementById('desktop-bg');
+        body.style.backgroundImage = d && d.src ? `url('${d.src}')` : "url('https://win98icons.alexmeub.com/images/clouds-wallpaper.jpg')";
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = 'center';
+    });
+}
+function changeBackground(event) {
+    const file = event.target.files[0]; if (!file) return;
+    const r = new FileReader();
+    r.onload = e => db.ref('wallpaper').set({ src: e.target.result, changedBy: localStorage.getItem('activeUser'), timestamp: Date.now() });
+    r.readAsDataURL(file);
+}
+function resetBackground() { db.ref('wallpaper').remove(); }
+
+
+// ================================================================
+//  12. AVATARS — walking sprites, Firebase presence
+// ================================================================
+
+// Avatar config per user
+const AVATAR_CONFIG = {
+    'Venance': { emoji: '🧑', color: '#880e4f' },
+    'Rehema':  { emoji: '👩', color: '#1565c0' }
+};
+
+const GREETINGS = ['Hi! 👋','❤️','Miss you!','😊','Heyy!','💕','Hi Bubb!', 'Big Mama, no kids'];
+let bubbleTimeout = null;
+let lastBubbleTime = 0;
+
+function initPresence() {
+    const user = localStorage.getItem('activeUser');
+    if (!user) return;
+
+    // Register this user as online with a random starting position
+    myPresenceRef = db.ref(`presence/${user}`);
+    const startX = 100 + Math.random() * (window.innerWidth - 200);
+
+    myPresenceRef.set({ x: startX, dir: 1, online: true, ts: Date.now() });
+    // Remove from DB when browser closes
+    myPresenceRef.onDisconnect().remove();
+
+    // Start moving our own avatar
+    startMyAvatarMovement(user, startX);
+}
+
+function startMyAvatarMovement(user, startX) {
+    let x = startX;
+    let vx = (Math.random() > 0.5 ? 1 : -1) * (0.6 + Math.random() * 0.8); // gentle walk speed
+    let lastUpdate = 0;
+    const DB_UPDATE_INTERVAL = 200; // ms between DB position writes
+
+    function walk(now) {
+        x += vx;
+        // Bounce off screen edges
+        if (x < 20)                       { x = 20;                        vx = Math.abs(vx); }
+        if (x > window.innerWidth - 60)   { x = window.innerWidth - 60;    vx = -Math.abs(vx); }
+
+        // Occasionally change direction
+        if (Math.random() < 0.003) vx = (Math.random() > 0.5 ? 1 : -1) * (0.6 + Math.random() * 0.8);
+
+        // Update local sprite immediately (smooth)
+        updateAvatarSprite(user, x, vx > 0 ? 1 : -1);
+
+        // Write to DB at limited rate (don't flood Firebase)
+        if (now - lastUpdate > DB_UPDATE_INTERVAL) {
+            lastUpdate = now;
+            if (myPresenceRef) myPresenceRef.update({ x: Math.round(x), dir: vx > 0 ? 1 : -1, ts: Date.now() });
+        }
+
+        avatarRAF = requestAnimationFrame(walk);
+    }
+    avatarRAF = requestAnimationFrame(walk);
+}
+
+function listenForAvatars() {
+    db.ref('presence').on('value', snapshot => {
+        const online = snapshot.val() || {};
+        const myUser = localStorage.getItem('activeUser');
+
+        // For OTHER users, update their sprite position from DB
+        Object.entries(online).forEach(([user, data]) => {
+            if (user === myUser) return; // we drive our own locally
+            updateAvatarSprite(user, data.x, data.dir || 1);
+        });
+
+        // Remove sprites for users who went offline
+        document.querySelectorAll('.avatar-sprite').forEach(el => {
+            const u = el.dataset.user;
+            if (!online[u] && u !== myUser) el.remove();
+        });
+
+        // Check proximity for speech bubble
+        if (myUser && Object.keys(online).length >= 2) {
+            checkAvatarProximity(online, myUser);
         }
     });
 }
 
-function changeBackground(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        db.ref('wallpaper').set({ src: e.target.result, changedBy: localStorage.getItem('activeUser'), timestamp: Date.now() });
-    };
-    reader.readAsDataURL(file);
+function updateAvatarSprite(user, x, dir) {
+    const cfg = AVATAR_CONFIG[user] || { emoji: '🙂', color: '#555' };
+
+    let el = document.querySelector(`.avatar-sprite[data-user="${user}"]`);
+    if (!el) {
+        el = document.createElement('div');
+        el.className = 'avatar-sprite';
+        el.dataset.user = user;
+        el.innerHTML = `
+            <div class="avatar-figure">${cfg.emoji}</div>
+            <div class="avatar-label" style="background:${cfg.color};">${user}</div>`;
+        document.body.appendChild(el);
+    }
+
+    el.style.left = x + 'px';
+
+    const fig = el.querySelector('.avatar-figure');
+    if (dir < 0) {
+        fig.classList.add('flipped');
+    } else {
+        fig.classList.remove('flipped');
+    }
 }
 
-function resetBackground() {
-    db.ref('wallpaper').remove();
+function checkAvatarProximity(online, myUser) {
+    const myData = online[myUser];
+    if (!myData) return;
+
+    Object.entries(online).forEach(([user, data]) => {
+        if (user === myUser) return;
+        const dist = Math.abs((myData.x||0) - (data.x||0));
+
+        // Show bubble if within 80px and enough time has passed
+        if (dist < 80 && Date.now() - lastBubbleTime > 5000) {
+            lastBubbleTime = Date.now();
+            showAvatarBubble(myUser, myData.x, user);
+        }
+    });
+}
+
+function showAvatarBubble(fromUser, x, toUser) {
+    // Remove old bubble
+    document.querySelectorAll('.avatar-bubble').forEach(b => b.remove());
+    clearTimeout(bubbleTimeout);
+
+    const msg = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+    const bubble = document.createElement('div');
+    bubble.className = 'avatar-bubble';
+    bubble.innerText = msg;
+    const bx = Math.max(10, Math.min(x - 30, window.innerWidth - 120));
+    bubble.style.left   = bx + 'px';
+    bubble.style.bottom = '68px'; // above avatar
+    document.body.appendChild(bubble);
+
+    bubbleTimeout = setTimeout(() => bubble.remove(), 3000);
 }
 
 
 // ================================================================
-//  11. VALENTINE CELEBRATION
+//  13. VALENTINE CELEBRATION
 // ================================================================
 function createFlyingHearts(startX, startY) {
-    const heartCount = 90, roseCount = 40;
-    startX = startX || window.innerWidth  / 2;
-    startY = startY || window.innerHeight / 2;
-    for (let i = 0; i < heartCount + roseCount; i++) {
+    startX = startX || window.innerWidth/2; startY = startY || window.innerHeight/2;
+    for (let i = 0; i < 130; i++) {
         const p = document.createElement('div');
-        p.className = i < heartCount ? 'flying-heart' : 'flying-rose';
-        p.innerHTML = i < heartCount ? '❤️' : '🌹';
-        const angle    = Math.random() * Math.PI * 2;
-        const velocity = Math.random() * 300 + 200;
-        const duration = 5 + Math.random() * 3;
+        p.className = i < 90 ? 'flying-heart' : 'flying-rose';
+        p.innerHTML = i < 90 ? '❤️' : '🌹';
+        const angle = Math.random()*Math.PI*2, velocity = Math.random()*300+200, duration = 5+Math.random()*3;
         p.style.cssText = `position:fixed;left:${startX}px;top:${startY}px;font-size:${Math.random()*30+20}px;z-index:60000;pointer-events:none;`;
         document.body.appendChild(p);
         animateParticle(p, startX, startY, angle, velocity, duration);
-        setTimeout(() => p.remove(), duration * 1000);
+        setTimeout(() => p.remove(), duration*1000);
     }
 }
-
-function animateParticle(el, startX, startY, angle, velocity, duration) {
-    let x = startX, y = startY, vx = Math.cos(angle) * velocity, vy = Math.sin(angle) * velocity, time = 0;
-    const gravity = 150, bounce = 0.85;
-    function update() {
-        time += 0.016;
-        if (time > duration) return;
-        vy += gravity * 0.016;
-        x += vx * 0.016; y += vy * 0.016;
-        if (x < 0 || x > window.innerWidth)  vx *= -bounce;
-        if (y < 0 || y > window.innerHeight) vy *= -bounce;
-        el.style.left = x + 'px';
-        el.style.top  = y + 'px';
-        requestAnimationFrame(update);
+function animateParticle(el, sx, sy, angle, vel, dur) {
+    let x=sx, y=sy, vx=Math.cos(angle)*vel, vy=Math.sin(angle)*vel, t=0;
+    function upd() {
+        t+=0.016; if (t>dur) return;
+        vy+=150*0.016; x+=vx*0.016; y+=vy*0.016;
+        if (x<0||x>window.innerWidth)  vx*=-0.85;
+        if (y<0||y>window.innerHeight) vy*=-0.85;
+        el.style.left=x+'px'; el.style.top=y+'px';
+        requestAnimationFrame(upd);
     }
-    requestAnimationFrame(update);
+    requestAnimationFrame(upd);
 }
-
 function showGlowingText() {
     const el = document.createElement('div');
     el.className = 'glowing-text-overlay';
     el.innerHTML = '☺️☺️😏☺️☺️WHOOHOO☺️☺️😏☺️☺️';
-    el.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(32px,7vw,80px);font-weight:bold;color:#ff1493;z-index:70000;animation:glowPulse 0.6s infinite;text-align:center;pointer-events:none;white-space:nowrap;`;
+    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(32px,7vw,80px);font-weight:bold;color:#ff1493;z-index:70000;animation:glowPulse 0.6s infinite;text-align:center;pointer-events:none;white-space:nowrap;';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 5000);
 }
 
 
 // ================================================================
-//  12. NOTIFICATION
+//  14. NOTIFICATION
 // ================================================================
 function sendNotification() {
     const user = localStorage.getItem('activeUser') || 'Someone';
-    fetch('https://ntfy.sh/loveos_pager_channel', {
-        method: 'POST',
-        body: `❤️ ${user} wants attention! ❤️`,
-        headers: { 'Title': 'LoveOS 98 Alert', 'Priority': 'high' }
-    })
+    fetch('https://ntfy.sh/loveos_pager_channel', { method:'POST', body:`❤️ ${user} wants attention! ❤️`, headers:{ 'Title':'LoveOS 98 Alert','Priority':'high' } })
     .then(r => r.ok ? alert("Page Sent!") : alert("Failed to send."))
     .catch(() => alert("Connection Error."));
 }
 
 
 // ================================================================
-//  13. UTILITIES
+//  15. UTILITIES
 // ================================================================
 function updateClock() {
-    document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
 }
 
 function openWindow(id) {
-    const win = document.getElementById(id);
-    if (!win) return;
+    const win = document.getElementById(id); if (!win) return;
+    // If minimized, restore instead
+    if (minimizedWindows[id]) { restoreWindow(id); return; }
     win.style.display = 'block';
     bringToFront(win);
     requestAnimationFrame(() => {
-        const rect = win.getBoundingClientRect();
-        if (rect.right  > window.innerWidth)  win.style.left = Math.max(0, window.innerWidth  - win.offsetWidth  - 10) + 'px';
-        if (rect.bottom > window.innerHeight - 30) win.style.top = Math.max(0, window.innerHeight - win.offsetHeight - 36) + 'px';
-        if (rect.left < 0) win.style.left = '4px';
-        if (rect.top  < 0) win.style.top  = '4px';
+        const r = win.getBoundingClientRect();
+        if (r.right  > window.innerWidth)  win.style.left = Math.max(0, window.innerWidth  - win.offsetWidth  - 10) + 'px';
+        if (r.bottom > window.innerHeight-30) win.style.top  = Math.max(0, window.innerHeight - win.offsetHeight - 36) + 'px';
+        if (r.left < 0) win.style.left = '4px';
+        if (r.top  < 0) win.style.top  = '4px';
     });
 }
 
-function closeWindow(id) {
-    document.getElementById(id).style.display = 'none';
-}
+function closeWindow(id) { document.getElementById(id).style.display = 'none'; }
 
 function toggleStartMenu() {
     const m = document.getElementById('start-menu');
-    m.style.display = (m.style.display === 'none' || m.style.display === '') ? 'flex' : 'none';
+    m.style.display = (m.style.display==='none'||m.style.display==='') ? 'flex' : 'none';
 }
 
 document.addEventListener('click', e => {
-    const sm = document.getElementById('start-menu');
-    const sb = document.querySelector('.start-button');
-    if (sm && !sm.contains(e.target) && sb && !sb.contains(e.target)) {
-        sm.style.display = 'none';
-    }
+    const sm = document.getElementById('start-menu'), sb = document.querySelector('.start-button');
+    if (sm && !sm.contains(e.target) && sb && !sb.contains(e.target)) sm.style.display = 'none';
 });
 
 window.onload = initSystem;

@@ -13,50 +13,46 @@
 
     <!-- BOOT SCREEN -->
     <div id="boot-screen">
-        <div id="energy-star">
-            <img src="https://win98icons.alexmeub.com/icons/png/windows_update_large-2.png" alt="LoveOS 98">
-        </div>
-        <div id="boot-content">
-            <pre id="boot-lines"></pre>
-        </div>
+        <div id="energy-star"><img src="https://win98icons.alexmeub.com/icons/png/windows_update_large-2.png" alt="LoveOS 98"></div>
+        <div id="boot-content"><pre id="boot-lines"></pre></div>
     </div>
 
     <!-- USER SELECT -->
     <div id="login-overlay" style="display:none;">
-        <div class="window" style="width: min(400px, 90vw);">
+        <div class="window" style="width:min(400px,90vw);">
             <div class="title-bar"><div class="title-bar-text">Welcome to LoveOS 98</div></div>
             <div class="window-body">
-                <p style="text-align:center; margin-bottom:20px;">Select a user to log in</p>
-                <div id="user-tiles-container" style="display:flex; gap:20px; justify-content:center; margin-bottom:20px; flex-wrap:wrap;">
-                    <div class="user-tile" data-user="Venance" style="cursor:pointer; border:2px outset #fff; padding:15px; text-align:center; background:#c0c0c0;">
-                        <img src="pictures/Venance.png" style="width:80px; height:80px; border:2px solid #000; margin-bottom:10px;" alt="Venance">
-                        <p style="margin:5px 0; font-weight:bold;">Venance</p>
+                <p style="text-align:center;margin-bottom:20px;">Select a user to log in</p>
+                <div id="user-tiles-container" style="display:flex;gap:20px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;">
+                    <div class="user-tile" data-user="Venance" style="cursor:pointer;border:2px outset #fff;padding:15px;text-align:center;background:#c0c0c0;">
+                        <img src="pictures/Venance.png" style="width:80px;height:80px;border:2px solid #000;margin-bottom:10px;" alt="Venance">
+                        <p style="margin:5px 0;font-weight:bold;">Venance</p>
                     </div>
-                    <div class="user-tile" data-user="Rehema" style="cursor:pointer; border:2px outset #fff; padding:15px; text-align:center; background:#c0c0c0;">
-                        <img src="pictures/Rehema.png" style="width:80px; height:80px; border:2px solid #000; margin-bottom:10px;" alt="Rehema">
-                        <p style="margin:5px 0; font-weight:bold;">Rehema</p>
+                    <div class="user-tile" data-user="Rehema" style="cursor:pointer;border:2px outset #fff;padding:15px;text-align:center;background:#c0c0c0;">
+                        <img src="pictures/Rehema.png" style="width:80px;height:80px;border:2px solid #000;margin-bottom:10px;" alt="Rehema">
+                        <p style="margin:5px 0;font-weight:bold;">Rehema</p>
                     </div>
                 </div>
-                <div id="login-error" style="color:red; margin-bottom:10px; text-align:center;"></div>
+                <div id="login-error" style="color:red;margin-bottom:10px;text-align:center;"></div>
             </div>
         </div>
     </div>
 
     <!-- PASSWORD -->
     <div id="password-overlay" style="display:none;">
-        <div class="window" style="width: min(350px, 90vw);">
+        <div class="window" style="width:min(350px,90vw);">
             <div class="title-bar"><div class="title-bar-text" id="pwd-title">Welcome to LoveOS 98!</div></div>
             <div class="window-body">
-                <p id="pwd-text" style="text-align:center; margin-bottom:15px;">Enter your password</p>
+                <p id="pwd-text" style="text-align:center;margin-bottom:15px;">Enter your password</p>
                 <div class="field-row" style="margin-bottom:10px;">
                     <label for="login-pass">Password:</label>
                     <input type="password" id="login-pass" style="width:200px;">
                 </div>
-                <div class="field-row" style="justify-content:flex-end; gap:5px;">
+                <div class="field-row" style="justify-content:flex-end;gap:5px;">
                     <button id="btn-login-ok">OK</button>
                     <button onclick="goBackToUserSelect()">Cancel</button>
                 </div>
-                <div id="pwd-error" style="color:red; margin-top:10px; text-align:center;"></div>
+                <div id="pwd-error" style="color:red;margin-top:10px;text-align:center;"></div>
             </div>
         </div>
     </div>
@@ -64,191 +60,164 @@
     <!-- DESKTOP ICONS -->
     <div id="desktop">
         <div class="icon" ondblclick="openWindow('files-window')" ontouchend="handleIconTouch(event,'files-window')">
-            <img src="https://win98icons.alexmeub.com/icons/png/search_directory-0.png">
-            <span>My Files</span>
+            <img src="https://win98icons.alexmeub.com/icons/png/search_directory-0.png"><span>My Files</span>
         </div>
         <div class="icon" ondblclick="openWindow('calendar-window')" ontouchend="handleIconTouch(event,'calendar-window')">
-            <img src="https://win98icons.alexmeub.com/icons/png/calendar-0.png">
-            <span>Calendar</span>
+            <img src="https://win98icons.alexmeub.com/icons/png/calendar-0.png"><span>Calendar</span>
         </div>
         <div class="icon" ondblclick="openWindow('music-window')" ontouchend="handleIconTouch(event,'music-window')">
-            <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png">
-            <span>MixTapes</span>
+            <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png"><span>MixTapes</span>
         </div>
         <div class="icon" ondblclick="openWindow('photos-window')" ontouchend="handleIconTouch(event,'photos-window')">
-            <img src="https://win98icons.alexmeub.com/icons/png/camera3-2.png">
-            <span>Photos</span>
+            <img src="https://win98icons.alexmeub.com/icons/png/camera3-2.png"><span>Photos</span>
         </div>
         <div class="icon" ondblclick="openWindow('poetry-window')" ontouchend="handleIconTouch(event,'poetry-window')">
-            <img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png">
-            <span>Letter</span>
+            <img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png"><span>Letter</span>
         </div>
         <div class="icon" ondblclick="openWindow('paint-window')" ontouchend="handleIconTouch(event,'paint-window')">
-            <img src="https://win98icons.alexmeub.com/icons/png/paint_old-0.png">
-            <span>MS Paint</span>
+            <img src="https://win98icons.alexmeub.com/icons/png/paint_old-0.png"><span>MS Paint</span>
         </div>
         <div class="icon" ondblclick="openWindow('bored-window')" ontouchend="handleIconTouch(event,'bored-window')">
-            <img src="https://win98icons.alexmeub.com/icons/png/help_book_computer-4.png">
-            <span>Bored?</span>
+            <img src="https://win98icons.alexmeub.com/icons/png/help_book_computer-4.png"><span>Bored?</span>
         </div>
         <div class="icon" ondblclick="sendNotification()" ontouchend="handleIconTouch(event,null,sendNotification)">
-            <img src="https://win98icons.alexmeub.com/icons/png/modem-2.png">
-            <span>Need Attention!</span>
+            <img src="https://win98icons.alexmeub.com/icons/png/modem-2.png"><span>Need Attention!</span>
         </div>
         <div class="icon" ondblclick="newStickyNote()" ontouchend="handleIconTouch(event,null,newStickyNote)">
-            <img src="https://win98icons.alexmeub.com/icons/png/note-2.png">
-            <span>Notes!</span>
+            <img src="https://win98icons.alexmeub.com/icons/png/note-2.png"><span>Notes!</span>
         </div>
-        <!-- ENVELOPE ICON — sits on desktop after first open, re-triggers on double-click -->
         <div class="icon" id="envelope-desktop-icon" ondblclick="triggerEnvelopeSequence()" ontouchend="handleIconTouch(event,null,triggerEnvelopeSequence)" style="display:none;">
-            <img src="https://win98icons.alexmeub.com/icons/png/envelope_closed-0.png">
-            <span>Love Letter ❤️</span>
+            <img src="https://win98icons.alexmeub.com/icons/png/envelope_closed-0.png"><span>Love Letter ❤️</span>
         </div>
     </div>
 
-    <!-- START MENU — ALL apps listed -->
+    <!-- START MENU -->
     <div id="start-menu" class="start-menu" style="display:none;">
         <div class="sidebar"><span class="vertical-text">LoveOS 98</span></div>
         <div class="menu-items">
-            <div class="menu-item" onclick="openWindow('files-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/search_directory-0.png"> My Files
-            </div>
-            <div class="menu-item" onclick="openWindow('calendar-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/calendar-0.png"> Calendar
-            </div>
-            <div class="menu-item" onclick="openWindow('music-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png"> MixTapes
-            </div>
-            <div class="menu-item" onclick="openWindow('photos-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/camera3-2.png"> Photos
-            </div>
-            <div class="menu-item" onclick="openWindow('poetry-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png"> Letter
-            </div>
-            <div class="menu-item" onclick="openWindow('paint-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/paint_old-0.png"> MS Paint
-            </div>
-            <div class="menu-item" onclick="openWindow('bored-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/help_book_computer-4.png"> Bored?
-            </div>
-            <div class="menu-item" onclick="newStickyNote(); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/note-2.png"> New Note
-            </div>
-            <div class="menu-item" onclick="sendNotification(); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/modem-2.png"> Need Attention!
-            </div>
-            <div class="menu-item" id="start-envelope-item" onclick="triggerEnvelopeSequence(); toggleStartMenu()" style="display:none;">
-                <img src="https://win98icons.alexmeub.com/icons/png/envelope_closed-0.png"> Love Letter ❤️
-            </div>
+            <div class="menu-item" onclick="openWindow('files-window');toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/search_directory-0.png"> My Files</div>
+            <div class="menu-item" onclick="openWindow('calendar-window');toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/calendar-0.png"> Calendar</div>
+            <div class="menu-item" onclick="openWindow('music-window');toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png"> MixTapes</div>
+            <div class="menu-item" onclick="openWindow('photos-window');toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/camera3-2.png"> Photos</div>
+            <div class="menu-item" onclick="openWindow('poetry-window');toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png"> Letter</div>
+            <div class="menu-item" onclick="openWindow('paint-window');toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/paint_old-0.png"> MS Paint</div>
+            <div class="menu-item" onclick="openWindow('bored-window');toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/help_book_computer-4.png"> Bored?</div>
+            <div class="menu-item" onclick="newStickyNote();toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/note-2.png"> New Note</div>
+            <div class="menu-item" onclick="sendNotification();toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/modem-2.png"> Need Attention!</div>
+            <div class="menu-item" id="start-envelope-item" onclick="triggerEnvelopeSequence();toggleStartMenu()" style="display:none;"><img src="https://win98icons.alexmeub.com/icons/png/envelope_closed-0.png"> Love Letter ❤️</div>
             <div class="divider"></div>
-            <div class="menu-item" onclick="openWindow('settings-window'); toggleStartMenu()">
-                <img src="https://win98icons.alexmeub.com/icons/png/settings_gear-0.png"> Settings
-            </div>
+            <div class="menu-item" onclick="openWindow('settings-window');toggleStartMenu()"><img src="https://win98icons.alexmeub.com/icons/png/settings_gear-0.png"> Settings</div>
             <div class="divider"></div>
-            <div class="menu-item" onclick="logout()">
-                <img src="https://win98icons.alexmeub.com/icons/png/key_padlock-0.png"> Log Off...
-            </div>
+            <div class="menu-item" onclick="logout()"><img src="https://win98icons.alexmeub.com/icons/png/key_padlock-0.png"> Log Off...</div>
         </div>
     </div>
 
+    <!-- TASKBAR -->
     <div class="taskbar">
         <button class="start-button" onclick="toggleStartMenu()">
             <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png"> <b>Start</b>
         </button>
+        <!-- Taskbar window buttons (minimized windows appear here) -->
+        <div id="taskbar-windows" class="taskbar-windows"></div>
         <div class="time-box" id="clock">12:00 PM</div>
     </div>
 
-    <!-- ============================================================
-         ENVELOPE OVERLAY — Win98 themed, letter slides out of it
-         ============================================================ -->
+    <!-- ENVELOPE OVERLAY -->
     <div id="envelope-overlay" style="display:none;">
         <div class="env-overlay-bg"></div>
         <div class="env-stage">
-            <!-- The envelope itself -->
             <div class="env-win98" id="env-win98-el" onclick="openEnvelopeLetter()">
                 <div class="env-body-back"></div>
-                <!-- Letter that slides up out of envelope -->
                 <div class="env-letter" id="env-letter-el">
                     <div class="env-letter-inner">
-                        <p style="font-size:22px; margin:0 0 8px;">❤️</p>
-                        <p style="font-size:13px; margin:0 0 6px; font-weight:bold;">You have a special letter!</p>
-                        <p style="font-size:11px; color:#555; margin:0;">Click the envelope to open...</p>
+                        <p style="font-size:22px;margin:0 0 8px;">❤️</p>
+                        <p style="font-size:13px;margin:0 0 6px;font-weight:bold;">You have a special letter!</p>
+                        <p style="font-size:11px;color:#555;margin:0;">Click the envelope to open...</p>
                     </div>
                 </div>
-                <!-- Envelope front flap (covers letter) -->
                 <div class="env-front-bottom"></div>
                 <div class="env-flap" id="env-flap-el"></div>
-                <!-- Wax seal -->
                 <div class="env-seal" id="env-seal-el">❤</div>
-                <!-- Hover hint -->
                 <p class="env-click-hint">Double-click to open</p>
             </div>
         </div>
     </div>
 
-    <!-- CALENDAR -->
-    <div id="calendar-window" class="window draggable" style="display:none; top:10%; left:30%; width:min(380px,95vw);">
+    <!-- WINDOWS — all have minimize button added -->
+
+    <div id="calendar-window" class="window draggable" style="display:none;top:10%;left:30%;width:min(380px,95vw);">
         <div class="title-bar">
             <div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/calendar-0.png" style="width:16px;height:16px;margin-right:4px;vertical-align:middle;"> Shared Calendar</div>
-            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('calendar-window')"></button></div>
+            <div class="title-bar-controls">
+                <button class="min-btn" aria-label="Minimize" onclick="minimizeWindow('calendar-window','Calendar')"></button>
+                <button aria-label="Close" onclick="closeWindow('calendar-window')"></button>
+            </div>
         </div>
         <div class="window-body">
-            <div style="background:#f0f0f0; padding:10px; border:1px solid #888; margin-bottom:10px;">
+            <div style="background:#f0f0f0;padding:10px;border:1px solid #888;margin-bottom:10px;">
                 <p style="margin:0 0 5px 0;"><b>Add New Event:</b></p>
-                <div style="display:flex; gap:5px; margin-bottom:5px; flex-wrap:wrap;">
-                    <input type="date" id="cal-date" style="flex:1; padding:4px; min-width:100px;">
-                    <input type="text" id="cal-desc" placeholder="Event details..." style="flex:2; padding:4px; min-width:100px;">
+                <div style="display:flex;gap:5px;margin-bottom:5px;flex-wrap:wrap;">
+                    <input type="date" id="cal-date" style="flex:1;padding:4px;min-width:100px;">
+                    <input type="text" id="cal-desc" placeholder="Event details..." style="flex:2;padding:4px;min-width:100px;">
                 </div>
                 <button onclick="addCalendarEvent()" style="width:100%;">Save to Calendar</button>
             </div>
-            <div id="calendar-list" style="background:white; height:200px; overflow-y:auto; border:2px inset; padding:5px;"></div>
+            <div id="calendar-list" style="background:white;height:200px;overflow-y:auto;border:2px inset;padding:5px;"></div>
         </div>
     </div>
 
-    <!-- MY FILES -->
-    <div id="files-window" class="window draggable" style="display:none; top:15%; left:15%; width:min(400px,95vw); height:300px;">
+    <div id="files-window" class="window draggable" style="display:none;top:15%;left:15%;width:min(400px,95vw);height:300px;">
         <div class="title-bar">
             <div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/rename-5.png" style="width:16px;height:16px;margin-right:4px;vertical-align:middle;"> My Files</div>
-            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('files-window')"></button></div>
+            <div class="title-bar-controls">
+                <button class="min-btn" aria-label="Minimize" onclick="minimizeWindow('files-window','My Files')"></button>
+                <button aria-label="Close" onclick="closeWindow('files-window')"></button>
+            </div>
         </div>
-        <div class="window-body" style="height:calc(100% - 30px); display:flex; flex-direction:column;">
-            <div class="toolbar" style="padding-bottom:10px; border-bottom:1px solid #808080; margin-bottom:10px; display:flex; flex-wrap:wrap; gap:4px;">
+        <div class="window-body" style="height:calc(100% - 30px);display:flex;flex-direction:column;">
+            <div class="toolbar" style="padding-bottom:10px;border-bottom:1px solid #808080;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:4px;">
                 <button onclick="createNewFile()">+ New Text File</button>
                 <button onclick="document.getElementById('file-upload-input').click()">+ Upload Photo</button>
                 <input type="file" id="file-upload-input" style="display:none;" accept="image/*" onchange="handleFileUpload(event)">
                 <button onclick="clearAllFiles()">Format Disk (Clear)</button>
             </div>
-            <div id="file-list" style="background:white; flex-grow:1; border:2px inset #dfdfdf; padding:10px; display:flex; flex-wrap:wrap; gap:15px; align-content:flex-start; overflow-y:auto;"></div>
+            <div id="file-list" style="background:white;flex-grow:1;border:2px inset #dfdfdf;padding:10px;display:flex;flex-wrap:wrap;gap:15px;align-content:flex-start;overflow-y:auto;"></div>
         </div>
     </div>
 
-    <!-- MS PAINT -->
-    <div id="paint-window" class="window draggable" style="display:none; top:5%; left:5%; width:min(600px,95vw); height:min(450px,80vh);">
+    <div id="paint-window" class="window draggable" style="display:none;top:5%;left:5%;width:min(600px,95vw);height:min(450px,80vh);">
         <div class="title-bar">
             <div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/paint_file-5.png" style="width:16px;height:16px;margin-right:4px;vertical-align:middle;"> Paint</div>
-            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('paint-window')"></button></div>
+            <div class="title-bar-controls">
+                <button class="min-btn" aria-label="Minimize" onclick="minimizeWindow('paint-window','MS Paint')"></button>
+                <button aria-label="Close" onclick="closeWindow('paint-window')"></button>
+            </div>
         </div>
-        <div class="window-body" style="height:100%; margin:0; padding:0;">
+        <div class="window-body" style="height:100%;margin:0;padding:0;">
             <iframe src="https://jspaint.app/#local:695730e53389e8" width="100%" height="100%" style="border:none;"></iframe>
         </div>
     </div>
 
-    <!-- BORED -->
-    <div id="bored-window" class="window draggable" style="display:none; top:10%; left:10%; width:min(500px,95vw); height:min(400px,80vh);">
+    <div id="bored-window" class="window draggable" style="display:none;top:10%;left:10%;width:min(500px,95vw);height:min(400px,80vh);">
         <div class="title-bar">
             <div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/joystick-0.png" style="width:16px;height:16px;margin-right:4px;vertical-align:middle;"> The Useless Web</div>
-            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('bored-window')"></button></div>
+            <div class="title-bar-controls">
+                <button class="min-btn" aria-label="Minimize" onclick="minimizeWindow('bored-window','Bored?')"></button>
+                <button aria-label="Close" onclick="closeWindow('bored-window')"></button>
+            </div>
         </div>
-        <div class="window-body" style="height:100%; margin:0; padding:0;">
+        <div class="window-body" style="height:100%;margin:0;padding:0;">
             <iframe src="https://theuselessweb.com/" width="100%" height="100%" style="border:none;"></iframe>
         </div>
     </div>
 
-    <!-- SETTINGS -->
-    <div id="settings-window" class="window draggable" style="display:none; top:20%; left:20%;">
+    <div id="settings-window" class="window draggable" style="display:none;top:20%;left:20%;">
         <div class="title-bar">
             <div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/settings_gear-0.png" style="width:16px;height:16px;margin-right:4px;vertical-align:middle;"> Display Properties</div>
-            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('settings-window')"></button></div>
+            <div class="title-bar-controls">
+                <button class="min-btn" aria-label="Minimize" onclick="minimizeWindow('settings-window','Settings')"></button>
+                <button aria-label="Close" onclick="closeWindow('settings-window')"></button>
+            </div>
         </div>
         <div class="window-body">
             <p>Wallpaper:</p>
@@ -257,59 +226,60 @@
         </div>
     </div>
 
-    <!-- MIXTAPES -->
-    <div id="music-window" class="window draggable" style="display:none; top:30%; left:30%;">
+    <div id="music-window" class="window draggable" style="display:none;top:30%;left:30%;">
         <div class="title-bar">
             <div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/cd_audio_cd_a-4.png" style="width:16px;height:16px;margin-right:4px;vertical-align:middle;"> Spotify Player</div>
-            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('music-window')"></button></div>
+            <div class="title-bar-controls">
+                <button class="min-btn" aria-label="Minimize" onclick="minimizeWindow('music-window','MixTapes')"></button>
+                <button aria-label="Close" onclick="closeWindow('music-window')"></button>
+            </div>
         </div>
         <div class="window-body">
-            <select onchange="document.getElementById('spotify-frame').src=this.value" style="width:100%; margin-bottom:5px;">
+            <select onchange="document.getElementById('spotify-frame').src=this.value" style="width:100%;margin-bottom:5px;">
                 <option value="https://open.spotify.com/embed/playlist/2BPB6srVrCyAbzCzSyFcC4?utm_source=generator">Apogee</option>
                 <option value="https://open.spotify.com/embed/playlist/7sP4xa5Zy9cBCTz9O0ZFoM?utm_source=generator">Care Package</option>
             </select>
-            <iframe id="spotify-frame" src="https://open.spotify.com/embed/playlist/7sP4xa5Zy9cBCTz9O0ZFoM?utm_source=generator" width="100%" height="152" frameBorder="0" allow="encrypted-media"></iframe>
+            <iframe id="spotify-frame" src="https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M" width="100%" height="152" frameBorder="0" allow="encrypted-media"></iframe>
         </div>
     </div>
 
-    <!-- PHOTOS — now supports multiple photos with add/delete/nav -->
-    <div id="photos-window" class="window draggable" style="display:none; top:10%; left:10%; width:min(420px,95vw);">
+    <div id="photos-window" class="window draggable" style="display:none;top:10%;left:10%;width:min(420px,95vw);">
         <div class="title-bar">
             <div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/camera3-2.png" style="width:16px;height:16px;margin-right:4px;vertical-align:middle;"> Photo Viewer</div>
-            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('photos-window')"></button></div>
+            <div class="title-bar-controls">
+                <button class="min-btn" aria-label="Minimize" onclick="minimizeWindow('photos-window','Photos')"></button>
+                <button aria-label="Close" onclick="closeWindow('photos-window')"></button>
+            </div>
         </div>
         <div class="window-body">
-            <!-- Toolbar -->
-            <div style="display:flex; gap:4px; margin-bottom:6px; flex-wrap:wrap; border-bottom:1px solid #808080; padding-bottom:6px;">
+            <div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;border-bottom:1px solid #808080;padding-bottom:6px;">
                 <button onclick="document.getElementById('photo-add-input').click()">+ Add Photo</button>
                 <input type="file" id="photo-add-input" style="display:none;" accept="image/*" multiple onchange="addPhotosToGallery(event)">
                 <button onclick="deleteCurrentPhoto()">Delete This</button>
-                <span id="photo-counter" style="margin-left:auto; font-size:11px; align-self:center; color:#555;"></span>
+                <span id="photo-counter" style="margin-left:auto;font-size:11px;align-self:center;color:#555;"></span>
             </div>
-            <!-- Main photo display -->
-            <div style="background:#000; border:2px inset #dfdfdf; min-height:200px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                <img id="current-photo" src="pictures/Gemini_Generated_Image_5jaj355jaj355jaj.png"
-                     style="max-width:100%; max-height:320px; display:block; object-fit:contain;">
-                <p id="no-photos-msg" style="color:#999; font-size:12px; display:none; margin:20px;">No photos yet. Click + Add Photo!</p>
+            <div style="background:#000;border:2px inset #dfdfdf;min-height:200px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                <img id="current-photo" src="pictures/Gemini_Generated_Image_5jaj355jaj355jaj.png" style="max-width:100%;max-height:320px;display:block;object-fit:contain;">
+                <p id="no-photos-msg" style="color:#999;font-size:12px;display:none;margin:20px;">No photos yet. Click + Add Photo!</p>
             </div>
-            <!-- Nav buttons -->
-            <div style="display:flex; justify-content:center; gap:5px; margin-top:5px;">
+            <div style="display:flex;justify-content:center;gap:5px;margin-top:5px;">
                 <button onclick="changePhoto(-1)">◀ Back</button>
                 <button onclick="changePhoto(1)">Next ▶</button>
             </div>
-            <!-- Thumbnail strip -->
-            <div id="photo-thumbs" style="display:flex; gap:4px; margin-top:6px; overflow-x:auto; padding:4px; border-top:1px solid #ccc; min-height:44px;"></div>
+            <div id="photo-thumbs" style="display:flex;gap:4px;margin-top:6px;overflow-x:auto;padding:4px;border-top:1px solid #ccc;min-height:44px;"></div>
         </div>
     </div>
 
-    <!-- LETTER / NOTEPAD -->
-    <div id="poetry-window" class="window draggable" style="display:none; top:20%; left:20%;">
+    <div id="poetry-window" class="window draggable" style="display:none;top:20%;left:20%;">
         <div class="title-bar">
             <div class="title-bar-text"><img src="https://win98icons.alexmeub.com/icons/png/notepad-2.png" style="width:16px;height:16px;margin-right:4px;vertical-align:middle;"> Notepad</div>
-            <div class="title-bar-controls"><button aria-label="Close" onclick="closeWindow('poetry-window')"></button></div>
+            <div class="title-bar-controls">
+                <button class="min-btn" aria-label="Minimize" onclick="minimizeWindow('poetry-window','Letter')"></button>
+                <button aria-label="Close" onclick="closeWindow('poetry-window')"></button>
+            </div>
         </div>
         <div class="window-body">
-            <textarea id="notepad-content" style="width:100%; height:200px; resize:none; background:white; font-family:monospace;"></textarea>
+            <textarea id="notepad-content" style="width:100%;height:200px;resize:none;background:white;font-family:monospace;"></textarea>
             <button onclick="saveCurrentNotepad()" style="margin-top:5px;">Save to Shared Files</button>
         </div>
     </div>
