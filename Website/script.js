@@ -41,7 +41,7 @@ const WINDOW_ICONS = {
 };
 
 // Avatar state
-const AVATAR_EMOJIS = { 'Venance': '👨🏾', 'Rehema': '👩🏾‍🦱' };
+const AVATAR_EMOJIS = { 'Venance': '👨🏾‍🦱', 'Rehema': '👩🏾‍🦱' };
 const avatarState = {}; // keyed by username
 let avatarRAF = null;
 let myPresenceRef = null;
@@ -644,8 +644,8 @@ function resetBackground() { db.ref('wallpaper').remove(); }
 
 // Avatar config per user
 const AVATAR_CONFIG = {
-    'Venance': { emoji: '🧑', color: '#880e4f' },
-    'Rehema':  { emoji: '👩', color: '#1565c0' }
+    'Venance': { emoji: '👨🏾‍🦱', color: '#880e4f' },
+    'Rehema':  { emoji: '👩🏾‍🦱', color: '#1565c0' }
 };
 
 const GREETINGS = ['Hi! 👋','❤️','Miss you!','😊','Heyy!','💕','Hi Bubb!', 'Big Mama, no kids'];
