@@ -1,7 +1,25 @@
-/* --- 1. BOOT & LOGIN --- */
+// --- FIREBASE INITIALIZATION ---
+// Replace this with your actual Firebase config from the console!
+const firebaseConfig = {
+  apiKey: "AIzaSyBwskNndOxOXmGonLMEscu9c2GHMIYr1rM",
+  authDomain: "loveos-98.firebaseapp.com",
+  projectId: "loveos-98",
+  storageBucket: "loveos-98.firebasestorage.app",
+  messagingSenderId: "629215418720",
+  appId: "1:629215418720:web:cabed0cfd2bd05eecd6605",
+  measurementId: "G-G317KDMCE9"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// --- 1. BOOT & LOGIN ---
 const USERS = { 'Venance': 'letmein', 'Rehema': 'letmein' };
+let selectedUser = null;
 
 function initSystem() {
+    // Ensuring desktop is hidden by default is handled by CSS, 
+    // but we double check logic here.
     if (localStorage.getItem('isLoggedIn') === 'true') {
         document.getElementById('boot-screen').style.display = 'none';
         document.getElementById('login-overlay').style.display = 'none';
@@ -16,9 +34,12 @@ function runBootSequence() {
     const lines = [ "BIOS Date 02/14/98 12:00:00 Ver: 1.0.0", "CPU: Pentium II 333MHz", "64MB RAM System OK", "Starting Windows 98..." ];
     let i = 0;
     const interval = setInterval(() => {
-        bootLines.innerText += lines[i] + "\n";
+        bootLines.innerText += (lines[i] + "\n");
         i++;
-        if (i >= lines.length) { clearInterval(interval); setTimeout(showLoginScreen, 1000); }
+        if (i >= lines.length) { 
+            clearInterval(interval); 
+            setTimeout(showLoginScreen, 1000); 
+        }
     }, 500);
 }
 
@@ -27,8 +48,6 @@ function showLoginScreen() {
     document.getElementById('login-overlay').style.display = 'flex';
     initUserTiles();
 }
-
-let selectedUser = null;
 
 function initUserTiles() {
     document.querySelectorAll('.user-tile').forEach(tile => {
@@ -50,299 +69,137 @@ function goBackToUserSelect() {
     document.getElementById('password-overlay').style.display = 'none';
     document.getElementById('login-overlay').style.display = 'flex';
     selectedUser = null;
-    document.getElementById('pwd-error').innerText = '';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const pwdInput = document.getElementById('login-pass');
-    if (pwdInput) {
-        pwdInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && selectedUser) {
-                document.getElementById('btn-login-ok').click();
+    const loginOkBtn = document.getElementById('btn-login-ok');
+    if (loginOkBtn) {
+        loginOkBtn.addEventListener('click', () => {
+            const pass = document.getElementById('login-pass').value;
+            if (selectedUser && USERS[selectedUser] === pass) {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('activeUser', selectedUser);
+                document.getElementById('password-overlay').style.display = 'none';
+                showDesktop();
+            } else {
+                document.getElementById('pwd-error').innerText = "Incorrect Password";
             }
         });
-    }
-    
-    document.getElementById('btn-login-ok').addEventListener('click', () => {
-        const pass = document.getElementById('login-pass').value;
-        if (selectedUser && USERS[selectedUser] && USERS[selectedUser] === pass) {
-            localStorage.setItem('isLoggedIn', 'true');
-            document.getElementById('password-overlay').style.display = 'none';
-            showDesktop();
-        } else {
-            document.getElementById('pwd-error').innerText = "Incorrect Password";
-        }
-    });
-    
-    const backBtn = document.getElementById('btn-login-back');
-    if (backBtn) {
-        backBtn.addEventListener('click', goBackToUserSelect);
     }
 });
 
 function logout() {
     localStorage.removeItem('isLoggedIn');
-    location.reload(); // Reloads page to show boot screen again
+    location.reload();
 }
 
 function showDesktop() {
     document.getElementById('desktop').style.display = 'flex';
     document.querySelector('.taskbar').style.display = 'flex';
-    loadSettings();
-    populateStartMenu();
-    loadStickyNotes(); // Load saved sticky notes
-    setTimeout(showValentinePrompt, 800); // Show valentine prompt after desktop loads
+    updateClock();
+    setInterval(updateClock, 1000);
+    
+    // --- START FIREBASE LISTENERS ---
+    listenForSharedFiles();
+    listenForStickyNotes();
+    listenForCalendar();
+    
+    // Call Envelope Trigger instead of direct Prompt
+    setTimeout(showEnvelope, 1000);
 }
 
-/* --- VALENTINE PROMPT --- */
-let valentineCount = 0; // Track how many times "No" is clicked
-
-/* --- FLYING HEARTS & ROSES CELEBRATION --- */
-function createFlyingHearts(startX, startY) {
-    const heartCount = 90;
-    const roseCount = 40;
-    
-    // Default to center if not provided
-    if (!startX) startX = window.innerWidth / 2;
-    if (!startY) startY = window.innerHeight / 2;
-    
-    // Create hearts
-    for (let i = 0; i < heartCount; i++) {
-        const heart = document.createElement('div');
-        heart.className = 'flying-heart';
-        heart.innerHTML = '❤️';
-        
-        const angle = (i / heartCount) * Math.PI * 2;
-        const velocity = Math.random() * 300 + 250;
-        const duration = 5 + Math.random() * 3;
-        
-        heart.style.cssText = `
-            position: fixed;
-            left: ${startX}px;
-            top: ${startY}px;
-            font-size: ${Math.random() * 30 + 20}px;
-            pointer-events: none;
-            z-index: 60000;
-            opacity: 1;
-            display: block;
-        `;
-        document.body.appendChild(heart);
-        
-        // Animate burst and bounce
-        animateParticle(heart, startX, startY, angle, velocity, duration);
-        
-        setTimeout(() => {
-            if (heart.parentNode) heart.remove();
-        }, duration * 1000 + 100);
-    }
-    
-    // Create roses
-    for (let i = 0; i < roseCount; i++) {
-        const rose = document.createElement('div');
-        rose.className = 'flying-rose';
-        rose.innerHTML = '🌹';
-        
-        const angle = (i / roseCount) * Math.PI * 2;
-        const velocity = Math.random() * 280 + 240;
-        const duration = 5.5 + Math.random() * 3;
-        
-        rose.style.cssText = `
-            position: fixed;
-            left: ${startX}px;
-            top: ${startY}px;
-            font-size: ${Math.random() * 25 + 18}px;
-            pointer-events: none;
-            z-index: 60001;
-            opacity: 1;
-            display: block;
-        `;
-        document.body.appendChild(rose);
-        
-        // Animate burst and bounce
-        animateParticle(rose, startX, startY, angle, velocity, duration);
-        
-        setTimeout(() => {
-            if (rose.parentNode) rose.remove();
-        }, duration * 1000 + 100);
-    }
+// --- 2. ENVELOPE LOGIC (New) ---
+function showEnvelope() {
+    document.getElementById('envelope-overlay').style.display = 'flex';
 }
 
-function showGlowingText() {
-    const textOverlay = document.createElement('div');
-    textOverlay.className = 'glowing-text-overlay';
-    textOverlay.innerHTML = '☺️☺️😏☺️☺️WHOOHOO☺️☺️😏☺️☺️';
-    textOverlay.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 120px;
-        font-weight: bold;
-        color: #ff1493;
-        text-shadow: 0 0 20px #ff1493, 0 0 40px #ff1493, 0 0 60px #ff1493, 0 0 80px #ff1493, 0 0 100px #ff1493;
-        z-index: 70000;
-        font-family: Arial, sans-serif;
-        letter-spacing: 8px;
-        animation: glowPulse 0.6s ease-in-out infinite;
-    `;
-    document.body.appendChild(textOverlay);
+function openEnvelope() {
+    const env = document.getElementById('envelope');
+    // Animate scale up and fade out
+    env.style.transform = "scale(3)";
+    env.style.opacity = "0";
     
     setTimeout(() => {
-        textOverlay.remove();
-    }, 5000);
+        document.getElementById('envelope-overlay').style.display = 'none';
+        showValentinePrompt();
+    }, 600);
 }
 
-function animateParticle(element, startX, startY, angle, velocity, duration) {
-    let x = startX;
-    let y = startY;
-    let vx = Math.cos(angle) * velocity;
-    let vy = Math.sin(angle) * velocity;
-    let time = 0;
-    const gravity = 150;
-    const bounce = 0.85;
-    
-    function updateParticle(timestamp) {
-        const deltaTime = 0.016;
-        time += deltaTime;
-        
-        if (time > duration) return;
-        
-        // Apply gravity
-        vy += gravity * deltaTime;
-        
-        // Update position
-        x += vx * deltaTime;
-        y += vy * deltaTime;
-        
-        // Boundary bouncing
-        if (x < 0 || x > window.innerWidth) {
-            vx *= -bounce;
-            x = Math.max(0, Math.min(window.innerWidth, x));
-        }
-        if (y < 0 || y > window.innerHeight) {
-            vy *= -bounce;
-            y = Math.max(0, Math.min(window.innerHeight, y));
-        }
-        
-        // Apply damping (reduced for longer travel)
-        vx *= 0.992;
-        vy *= 0.992;
-        
-        element.style.left = x + 'px';
-        element.style.top = y + 'px';
-        
-        requestAnimationFrame(updateParticle);
+// --- 3. GLOBAL CALENDAR (New) ---
+function listenForCalendar() {
+    db.ref('calendar').on('value', (snapshot) => {
+        const events = snapshot.val() || {};
+        renderCalendarEvents(events);
+    });
+}
+
+function addCalendarEvent() {
+    const dateVal = document.getElementById('cal-date').value;
+    const descVal = document.getElementById('cal-desc').value;
+
+    if (!dateVal || !descVal) {
+        alert("Please enter a date and a description!");
+        return;
     }
+
+    const newEventRef = db.ref('calendar').push();
+    newEventRef.set({
+        id: newEventRef.key,
+        date: dateVal,
+        description: descVal,
+        author: localStorage.getItem('activeUser')
+    });
     
-    requestAnimationFrame(updateParticle);
+    // clear input
+    document.getElementById('cal-desc').value = '';
 }
 
-function showValentinePrompt() {
-    valentineCount += 1;
+function renderCalendarEvents(eventsObj) {
+    const list = document.getElementById('calendar-list');
+    list.innerHTML = '';
     
-    // Create the valentine dialog with Windows 98 styling
-    const dialog = document.createElement('div');
-    dialog.className = 'window valentine-dialog';
-    dialog.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 350px;
-        z-index: 50000;
-    `;
-    
-    dialog.innerHTML = `
-        <div class="title-bar">
-            <div class="title-bar-text">❤️ Valentine</div>
-        </div>
-        <div class="window-body">
-            <div style="text-align: center; padding: 15px;">
-                <div style="font-size: 60px; margin-bottom: 15px;">❤️</div>
-                <p style="font-size: 14px; margin: 15px 0; font-family: 'MS Sans Serif', Arial, sans-serif;">Will you be my Valentine?</p>
-                <div style="display: flex; gap: 8px; justify-content: center; margin-top: 20px;">
-                    <button id="val-yes" class="valentine-yes" style="min-width: 80px; padding: 6px 12px;">Yes ❤️</button>
-                    <button id="val-no" class="valentine-no" style="min-width: 80px; padding: 6px 12px;">No</button>
-                </div>
+    // Convert object to array and sort by date
+    const eventsArr = Object.values(eventsObj).sort((a,b) => new Date(a.date) - new Date(b.date));
+
+    eventsArr.forEach(ev => {
+        const item = document.createElement('div');
+        item.className = 'calendar-event';
+        item.innerHTML = `
+            <div>
+                <strong>${ev.date}:</strong> ${ev.description}
             </div>
-        </div>
-    `;
-    
-    document.body.appendChild(dialog);
-    
-    const yesBtn = dialog.querySelector('#val-yes');
-    const noBtn = dialog.querySelector('#val-no');
-    
-    yesBtn.onclick = () => {
-        const rect = yesBtn.getBoundingClientRect();
-        const startX = rect.left + rect.width / 2;
-        const startY = rect.top + rect.height / 2;
-        createFlyingHearts(startX, startY);
-        showGlowingText();
-        setTimeout(() => {
-            dialog.remove();
-            valentineCount = 0;
-        }, 500);
-    };
-    
-    // No button runs away but stays in bounded area around the dialog
-    const dialogCenterX = window.innerWidth / 2;
-    const dialogCenterY = window.innerHeight / 2;
-    const boundaryRadius = 175; // Stay within 250px of dialog center
-    
-    const moveNoButton = () => {
-        // Generate random position within bounded area
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.random() * boundaryRadius;
-        const randomX = dialogCenterX + Math.cos(angle) * distance - 80;
-        const randomY = dialogCenterY + Math.sin(angle) * distance - 55;
-        
-        noBtn.style.position = 'fixed';
-        noBtn.style.left = Math.max(0, Math.min(randomX, window.innerWidth - 100)) + 'px';
-        noBtn.style.top = Math.max(0, Math.min(randomY, window.innerHeight - 75)) + 'px';
-        noBtn.style.zIndex = '50005';
-    };
-    
-    noBtn.onmouseover = moveNoButton;
-    noBtn.onclick = (e) => {
-        e.preventDefault();
-        moveNoButton();
-    };
+            <button onclick="deleteCalendarEvent('${ev.id}')" style="min-width:20px; padding:0 5px;">x</button>
+        `;
+        list.appendChild(item);
+    });
 }
 
-/* --- 2. NOTIFICATION SYSTEM (Pager) --- */
-function sendNotification() {
-    // 1. CHANGE 'loveos_pager_channel' TO A UNIQUE SECRET NAME
-    const topic = 'loveos_pager_channel'; 
-    
-    fetch(`https://ntfy.sh/${topic}`, {
-        method: 'POST',
-        body: '❤️ Rehema Wants Attention! ❤️',
-        headers: { 'Title': 'LoveOS Request', 'Priority': 'high' }
-    })
-    .then(response => {
-        if(response.ok) alert("Page sent successfully! He will be with you shortly.");
-        else alert("Pager network is busy.");
-    })
-    .catch(err => alert("Connection Error: Check internet."));
+function deleteCalendarEvent(id) {
+    if(confirm("Delete this event?")) {
+        db.ref(`calendar/${id}`).remove();
+    }
 }
 
-/* --- 3. MY FILES SYSTEM (LocalStorage) --- */
-function getFiles() {
-    return JSON.parse(localStorage.getItem('myFiles') || "[]");
-}
 
-function saveFiles(files) {
-    localStorage.setItem('myFiles', JSON.stringify(files));
-    renderFiles();
+// --- 4. GLOBAL FILE SYSTEM (Firebase) ---
+function listenForSharedFiles() {
+    db.ref('sharedFiles').on('value', (snapshot) => {
+        const files = snapshot.val() || {};
+        renderFiles(Object.values(files));
+    });
 }
 
 function createNewFile() {
-    const name = prompt("Enter file name (e.g., Note.txt):", "New Note.txt");
+    const name = prompt("Enter file name:", "New Note.txt");
     if (!name) return;
-    const files = getFiles();
-    files.push({ id: Date.now(), name: name, type: 'text', content: '' });
-    saveFiles(files);
+    const newFileRef = db.ref('sharedFiles').push();
+    newFileRef.set({
+        id: newFileRef.key,
+        name: name,
+        type: 'text',
+        content: '',
+        author: localStorage.getItem('activeUser')
+    });
 }
 
 function handleFileUpload(event) {
@@ -350,36 +207,36 @@ function handleFileUpload(event) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
-        const files = getFiles();
-        files.push({ id: Date.now(), name: file.name, type: 'image', content: e.target.result });
-        saveFiles(files);
+        const newFileRef = db.ref('sharedFiles').push();
+        newFileRef.set({
+            id: newFileRef.key,
+            name: file.name,
+            type: 'image',
+            content: e.target.result,
+            author: localStorage.getItem('activeUser')
+        });
     };
     reader.readAsDataURL(file);
 }
 
-function renderFiles() {
+function renderFiles(files) {
     const container = document.getElementById('file-list');
+    if (!container) return;
     container.innerHTML = '';
-    const files = getFiles();
     
     files.forEach(file => {
         const div = document.createElement('div');
         div.className = 'file-item';
-        // Icon based on type
         const iconSrc = file.type === 'image' 
             ? 'https://win98icons.alexmeub.com/icons/png/image_gif-0.png' 
             : 'https://win98icons.alexmeub.com/icons/png/notepad_file-2.png';
             
         div.innerHTML = `<img src="${iconSrc}"><span>${file.name}</span>`;
-        
         div.ondblclick = () => openFile(file);
-        
-        // Right click to delete (simple implementation)
         div.oncontextmenu = (e) => {
             e.preventDefault();
-            if(confirm(`Delete ${file.name}?`)) {
-                const newFiles = files.filter(f => f.id !== file.id);
-                saveFiles(newFiles);
+            if(confirm(`Delete ${file.name} for everyone?`)) {
+                db.ref(`sharedFiles/${file.id}`).remove();
             }
         };
         container.appendChild(div);
@@ -391,7 +248,6 @@ function openFile(file) {
         openWindow('poetry-window');
         const textarea = document.getElementById('notepad-content');
         textarea.value = file.content;
-        // Hook save button to update this specific file
         textarea.dataset.currentFileId = file.id;
     } else if (file.type === 'image') {
         openWindow('photos-window');
@@ -401,211 +257,186 @@ function openFile(file) {
 
 function saveCurrentNotepad() {
     const textarea = document.getElementById('notepad-content');
-    const content = textarea.value;
     const id = textarea.dataset.currentFileId;
-    
     if (id) {
-        // Update existing file
-        const files = getFiles();
-        const file = files.find(f => f.id == id);
-        if (file) {
-            file.content = content;
-            saveFiles(files);
-            alert("File saved!");
-        }
+        db.ref(`sharedFiles/${id}`).update({ content: textarea.value });
+        alert("File updated for both users!");
     } else {
-        // Save as new
-        const name = prompt("Save as:", "Note.txt");
-        if(name) {
-            const files = getFiles();
-            files.push({ id: Date.now(), name: name, type: 'text', content: content });
-            saveFiles(files);
-            alert("Saved to My Files!");
-        }
+        createNewFile();
     }
 }
 
 function clearAllFiles() {
-    if(confirm("Are you sure you want to delete all files?")) {
-        localStorage.removeItem('myFiles');
-        renderFiles();
+    if(confirm("Format Disk? This deletes EVERYTHING in the cloud.")) {
+        db.ref('sharedFiles').remove();
     }
 }
 
-/* --- 4. STANDARD WINDOW FUNCTIONS --- */
-function openWindow(id) {
-    const win = document.getElementById(id);
-    if (win) {
-        win.style.display = 'block';
-        bringToFront(id);
-    }
-}
-function closeWindow(id) { document.getElementById(id).style.display = 'none'; }
-
-function bringToFront(id) {
-    document.querySelectorAll('.window').forEach(w => w.style.zIndex = 10);
-    const el = document.getElementById(id);
-    if(el) el.style.zIndex = 1000;
-}
-
-function toggleStartMenu() {
-    const menu = document.getElementById('start-menu');
-    menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
-    if(menu.style.display === 'flex') bringToFront('start-menu');
-}
-
-/* --- 5. DRAGGABLE --- */
-function dragElement(elmnt) {
-    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    
-    // Handle both title-bar (windows) and sticky-header (sticky notes)
-    const header = elmnt.querySelector(".title-bar") || elmnt.querySelector(".sticky-header");
-    if (header) header.onmousedown = dragMouseDown;
-
-    function dragMouseDown(e) {
-        e.preventDefault();
-        pos3 = e.clientX; pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
-        if (elmnt.id) bringToFront(elmnt.id);
-    }
-
-    function elementDrag(e) {
-        e.preventDefault();
-        pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
-        pos3 = e.clientX; pos4 = e.clientY;
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-    }
-
-    function closeDragElement() { document.onmouseup = null; document.onmousemove = null; }
-}
-
-// Draggable windows
-document.querySelectorAll('.window').forEach(dragElement);
-
-/* --- 6. BACKGROUND SETTINGS --- */
-function changeBackground(event) {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        document.body.style.backgroundImage = `url(${e.target.result})`;
-        localStorage.setItem('customBG', e.target.result);
-    };
-    reader.readAsDataURL(file);
-}
-function resetBackground() {
-    document.body.style.backgroundImage = "url('https://win98icons.alexmeub.com/images/clouds-wallpaper.jpg')";
-    localStorage.removeItem('customBG');
-}
-function loadSettings() {
-    const bg = localStorage.getItem('customBG');
-    if(bg) document.body.style.backgroundImage = `url(${bg})`;
-}
-
-// Populate Start Menu
-function populateStartMenu() {
-    const container = document.querySelector('.menu-items');
-    // Don't duplicate items if they exist
-    if (container.querySelector('.generated')) return;
-
-    const divider = container.querySelector('.divider');
-    const icons = document.querySelectorAll('#desktop .icon');
-    
-    icons.forEach(icon => {
-        const text = icon.querySelector('span').innerText;
-        const img = icon.querySelector('img').src;
-        const dblclick = icon.getAttribute('ondblclick');
-        
-        const item = document.createElement('div');
-        item.className = 'menu-item generated';
-        item.innerHTML = `<img src="${img}"> ${text}`;
-        item.onclick = () => { eval(dblclick); toggleStartMenu(); };
-        container.insertBefore(item, divider);
+// --- 5. GLOBAL STICKY NOTES (Firebase) ---
+function listenForStickyNotes() {
+    db.ref('stickyNotes').on('value', (snapshot) => {
+        const notes = snapshot.val() || {};
+        document.querySelectorAll('.sticky-note').forEach(n => n.remove());
+        Object.values(notes).forEach(note => createStickyNoteElement(note));
     });
 }
 
-// Photo Viewer Navigation
-let currentPhotoIndex = 0;
-function changePhoto(direction) {
-    const files = getFiles();
-    const photos = files.filter(f => f.type === 'image');
-    
-    if (photos.length === 0) return;
-    
-    currentPhotoIndex += direction;
-    if (currentPhotoIndex < 0) currentPhotoIndex = photos.length - 1;
-    if (currentPhotoIndex >= photos.length) currentPhotoIndex = 0;
-    
-    document.getElementById('current-photo').src = photos[currentPhotoIndex].content;
-}
-
-// --- STICKY NOTES ENGINE ---
-
-// 1. Create a note (either a fresh one or loading a saved one)
-function createStickyNote(text = "", top = "150px", left = "150px") {
-    const id = "note-" + Date.now(); // Unique ID based on timestamp
-    const note = document.createElement('div');
-    note.className = "sticky-note";
-    note.id = id;
-    
-    // Position it exactly where it was saved
-    note.style.top = top;
-    note.style.left = left;
-    note.style.position = "absolute"; 
-    
-    note.innerHTML = `
-        <div class="sticky-header">
-            <span class="close-note" onclick="deleteNote('${id}')" title="Delete note">×</span>
-        </div>
-        <textarea placeholder="Write a note..." oninput="saveNotes()"></textarea>
-    `;
-    
-    document.body.appendChild(note);
-    note.querySelector('textarea').value = text; // Set text after adding to DOM
-    dragElement(note); // Make it draggable
-    saveNotes();       // Save the state
-}
-
-// 2. Delete a note and update storage
-function deleteNote(id) {
-    const note = document.getElementById(id);
-    if (note) {
-        note.remove();
-        saveNotes();
-    }
-}
-
-// 3. Save all notes (text + coordinates) to LocalStorage
-function saveNotes() {
-    const allNotes = [];
-    document.querySelectorAll('.sticky-note').forEach(note => {
-        allNotes.push({
-            text: note.querySelector('textarea').value,
-            top: note.style.top,
-            left: note.style.left
-        });
-    });
-    localStorage.setItem('savedStickyNotes', JSON.stringify(allNotes));
-}
-
-// 4. Load notes on startup
-function loadStickyNotes() {
-    const saved = JSON.parse(localStorage.getItem('savedStickyNotes') || "[]");
-    saved.forEach(noteData => {
-        createStickyNote(noteData.text, noteData.top, noteData.left);
-    });
-}
-
-// 5. Create a new note from desktop icon
 function newStickyNote() {
-    createStickyNote();
+    const newNoteRef = db.ref('stickyNotes').push();
+    newNoteRef.set({
+        id: newNoteRef.key,
+        text: '',
+        x: 150 + Math.random() * 100,
+        y: 150 + Math.random() * 100
+    });
 }
 
-// Clock
-setInterval(() => {
-    document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-}, 1000);
+function createStickyNoteElement(note) {
+    const el = document.createElement('div');
+    el.className = 'sticky-note';
+    el.style.left = note.x + 'px';
+    el.style.top = note.y + 'px';
+    el.innerHTML = `
+        <div class="sticky-header" onmousedown="dragNoteStart(event, '${note.id}')">
+            <span class="close-note" onclick="deleteNote('${note.id}')">×</span>
+        </div>
+        <textarea oninput="updateNoteText('${note.id}', this.value)">${note.text}</textarea>
+    `;
+    document.body.appendChild(el);
+}
 
-// Init
+function updateNoteText(id, text) {
+    db.ref(`stickyNotes/${id}`).update({ text: text });
+}
+
+function deleteNote(id) {
+    db.ref(`stickyNotes/${id}`).remove();
+}
+
+function dragNoteStart(e, id) {
+    const note = e.target.closest('.sticky-note');
+    let shiftX = e.clientX - note.getBoundingClientRect().left;
+    let shiftY = e.clientY - note.getBoundingClientRect().top;
+    function onMouseMove(e) {
+        note.style.left = (e.pageX - shiftX) + 'px';
+        note.style.top = (e.pageY - shiftY) + 'px';
+    }
+    document.addEventListener('mousemove', onMouseMove);
+    document.onmouseup = function() {
+        document.removeEventListener('mousemove', onMouseMove);
+        db.ref(`stickyNotes/${id}`).update({
+            x: parseInt(note.style.left),
+            y: parseInt(note.style.top)
+        });
+        document.onmouseup = null;
+    };
+}
+
+// --- 6. VALENTINE CELEBRATION & EFFECTS ---
+function createFlyingHearts(startX, startY) {
+    const heartCount = 90;
+    const roseCount = 40;
+    if (!startX) startX = window.innerWidth / 2;
+    if (!startY) startY = window.innerHeight / 2;
+
+    for (let i = 0; i < heartCount + roseCount; i++) {
+        const p = document.createElement('div');
+        p.className = (i < heartCount) ? 'flying-heart' : 'flying-rose';
+        p.innerHTML = (i < heartCount) ? '❤️' : '🌹';
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 300 + 200;
+        const duration = 5 + Math.random() * 3;
+        
+        p.style.cssText = `position:fixed; left:${startX}px; top:${startY}px; font-size:${Math.random()*30+20}px; z-index:60000; pointer-events:none;`;
+        document.body.appendChild(p);
+        animateParticle(p, startX, startY, angle, velocity, duration);
+        setTimeout(() => p.remove(), duration * 1000);
+    }
+}
+
+function animateParticle(element, startX, startY, angle, velocity, duration) {
+    let x = startX, y = startY, vx = Math.cos(angle) * velocity, vy = Math.sin(angle) * velocity;
+    let time = 0;
+    const gravity = 150, bounce = 0.85;
+    
+    function update() {
+        time += 0.016;
+        if (time > duration) return;
+        vy += gravity * 0.016;
+        x += vx * 0.016; y += vy * 0.016;
+        if (x < 0 || x > window.innerWidth) vx *= -bounce;
+        if (y < 0 || y > window.innerHeight) vy *= -bounce;
+        element.style.left = x + 'px';
+        element.style.top = y + 'px';
+        requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+}
+
+function showGlowingText() {
+    const textOverlay = document.createElement('div');
+    textOverlay.className = 'glowing-text-overlay';
+    textOverlay.innerHTML = '☺️☺️😏☺️☺️WHOOHOO☺️☺️😏☺️☺️';
+    textOverlay.style.cssText = `position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:80px; font-weight:bold; color:#ff1493; z-index:70000; animation:glowPulse 0.6s infinite; text-align:center; pointer-events:none;`;
+    document.body.appendChild(textOverlay);
+    setTimeout(() => textOverlay.remove(), 5000);
+}
+
+function showValentinePrompt() {
+    const dialog = document.createElement('div');
+    dialog.className = 'window valentine-dialog';
+    dialog.style.cssText = `position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:320px; z-index:50000;`;
+    dialog.innerHTML = `
+        <div class="title-bar"><div class="title-bar-text">❤️ Valentine Request</div></div>
+        <div class="window-body" style="text-align:center;">
+            <div style="font-size:50px; margin:10px;">❤️</div>
+            <p>Will you be my Valentine?</p>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
+                <button id="val-yes" class="valentine-yes">Yes ❤️</button>
+                <button id="val-no" class="valentine-no">No</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(dialog);
+    
+    const yesBtn = dialog.querySelector('#val-yes');
+    const noBtn = dialog.querySelector('#val-no');
+    
+    yesBtn.onclick = () => {
+        createFlyingHearts();
+        showGlowingText();
+        dialog.remove();
+    };
+    
+    noBtn.onmouseover = () => {
+        noBtn.style.position = 'fixed';
+        noBtn.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+        noBtn.style.top = Math.random() * (window.innerHeight - 50) + 'px';
+    };
+}
+
+// --- 7. NOTIFICATION SYSTEM (Pager) ---
+function sendNotification() {
+    const topic = 'loveos_pager_channel'; 
+    const user = localStorage.getItem('activeUser') || 'Someone';
+    fetch(`https://ntfy.sh/${topic}`, {
+        method: 'POST',
+        body: `❤️ ${user} wants attention! ❤️`,
+        headers: { 'Title': 'LoveOS 98 Alert', 'Priority': 'high' }
+    })
+    .then(r => r.ok ? alert("Page Sent!") : alert("Failed to send."))
+    .catch(() => alert("Connection Error."));
+}
+
+// --- 8. UTILITIES ---
+function updateClock() {
+    document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+function openWindow(id) { document.getElementById(id).style.display = 'block'; }
+function closeWindow(id) { document.getElementById(id).style.display = 'none'; }
+function toggleStartMenu() {
+    const m = document.getElementById('start-menu');
+    m.style.display = (m.style.display === 'none') ? 'flex' : 'none';
+}
+
 window.onload = initSystem;
