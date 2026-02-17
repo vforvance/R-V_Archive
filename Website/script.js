@@ -13,7 +13,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // --- GLOBAL STATE ---
-const USERS = { 'Venance': 'letmein', 'Rehema': '9299' };
+const USERS = { 'Venance': '12298', 'Rehema': '9299' };
 let selectedUser = null;
 let highestZ = 100;
 
@@ -142,7 +142,8 @@ function showDesktop() {
     initPresence();
     listenForAvatars();
 
-    setTimeout(showEnvelopeOverlay, 1000);
+    // CHANGED: Envelope icon visible from the start, doesn't auto-trigger anymore
+    revealDesktopEnvelopeIcon();
 }
 
 
@@ -247,7 +248,7 @@ function renderTaskbarWindows() {
 
 
 // ================================================================
-//  5. ENVELOPE
+//  5. ENVELOPE — now only shows when user clicks icon, not auto
 // ================================================================
 function showEnvelopeOverlay() {
     envelopeAnimating = false;
@@ -268,8 +269,10 @@ function openEnvelopeLetter() {
     }, 1500);
 }
 
+// CHANGED: This is now the entry point when clicking the desktop icon
 function triggerEnvelopeSequence() { showEnvelopeOverlay(); }
 
+// CHANGED: Icon is now visible from desktop load
 function revealDesktopEnvelopeIcon() {
     document.getElementById('envelope-desktop-icon').style.display = 'flex';
     document.getElementById('start-envelope-item').style.display = 'flex';
@@ -288,7 +291,7 @@ function showValentinePrompt() {
         <div class="title-bar"><div class="title-bar-text">❤️ You've Got Mail!</div></div>
         <div class="window-body" style="text-align:center;padding:10px;">
             <div style="font-size:48px;margin:6px 0;">❤️</div>
-            <p style="font-family:'cursive',cursive;margin:6px 0 14px;color:#880e4f;">Will you be my Valentine?</p>
+            <p style="font-family:'Comic Sans MS',cursive;margin:6px 0 14px;color:#880e4f;">Will you be my Valentine?</p>
             <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;">
                 <button id="val-yes" class="valentine-yes">Yes ❤️</button>
                 <button id="val-no"  class="valentine-no">No</button>
@@ -301,7 +304,6 @@ function showValentinePrompt() {
         createFlyingHearts();
         showGlowingText();
         dialog.remove();
-        revealDesktopEnvelopeIcon();
     };
 
     setTimeout(() => startNoBtnRoam(dialog.querySelector('#val-no')), 100);
@@ -428,7 +430,6 @@ function openFile(file) {
     if (file.type === 'text') {
         openWindow('poetry-window');
         const ta = document.getElementById('notepad-content');
-        // Only set content if this is a different file than what's currently open
         if (ta.dataset.currentFileId !== file.id) {
             ta.value = file.content;
             ta.dataset.currentFileId = file.id;
@@ -457,31 +458,22 @@ function clearAllFiles() { if (confirm("Format Disk? This deletes EVERYTHING in 
 // ================================================================
 //  9. STICKY NOTES — debounced DB sync so typing never stutters
 // ================================================================
-
-// Per-note debounce timers
 const _noteDebounceTimers = {};
 
 function listenForStickyNotes() {
     db.ref('stickyNotes').on('value', snapshot => {
         const notes = snapshot.val() || {};
-
-        // For each note in DB, either update its textarea (if it's NOT focused) or create it
         Object.values(notes).forEach(note => {
             const existing = document.querySelector(`.sticky-note[data-note-id="${note.id}"]`);
             if (existing) {
                 const ta = existing.querySelector('textarea');
-                // Only update the textarea if the user isn't currently typing into it
                 if (document.activeElement !== ta) {
                     ta.value = note.text || '';
                 }
-                // Update position only if not being dragged (check inline style change)
-                // We skip position update for existing notes to avoid jank
             } else {
                 createStickyNoteElement(note);
             }
         });
-
-        // Remove any notes deleted from DB
         document.querySelectorAll('.sticky-note').forEach(el => {
             if (!notes[el.dataset.noteId]) el.remove();
         });
@@ -507,7 +499,6 @@ function createStickyNoteElement(note) {
         <textarea placeholder="Type here...">${note.text||''}</textarea>`;
     const ta = el.querySelector('textarea');
 
-    // DEBOUNCED INPUT — user types freely, DB gets updated 600ms after they stop
     ta.addEventListener('input', () => {
         clearTimeout(_noteDebounceTimers[note.id]);
         _noteDebounceTimers[note.id] = setTimeout(() => {
@@ -641,57 +632,41 @@ function resetBackground() { db.ref('wallpaper').remove(); }
 // ================================================================
 //  12. AVATARS — walking sprites, Firebase presence
 // ================================================================
-
-// Avatar config per user
 const AVATAR_CONFIG = {
-    'Venance': { emoji: '👨🏾‍🦱', color: '#880e4f' },
-    'Rehema':  { emoji: '👩🏾‍🦱', color: '#1565c0' }
+    'Venance': { emoji: '🧑', color: '#880e4f' },
+    'Rehema':  { emoji: '👩', color: '#1565c0' }
 };
 
-const GREETINGS = ['Hi! 👋','❤️','Miss you!','😊','Heyy!','💕','Hi Bubb!', 'Big Mama, no kids'];
+const GREETINGS = ['Hi! 👋','❤️','Miss you!','😘','Heyy!','💕','Hi bubb!', 'Big Mama, No kids💅🏾'];
 let bubbleTimeout = null;
 let lastBubbleTime = 0;
 
 function initPresence() {
     const user = localStorage.getItem('activeUser');
     if (!user) return;
-
-    // Register this user as online with a random starting position
     myPresenceRef = db.ref(`presence/${user}`);
     const startX = 100 + Math.random() * (window.innerWidth - 200);
-
     myPresenceRef.set({ x: startX, dir: 1, online: true, ts: Date.now() });
-    // Remove from DB when browser closes
     myPresenceRef.onDisconnect().remove();
-
-    // Start moving our own avatar
     startMyAvatarMovement(user, startX);
 }
 
 function startMyAvatarMovement(user, startX) {
     let x = startX;
-    let vx = (Math.random() > 0.5 ? 1 : -1) * (0.6 + Math.random() * 0.8); // gentle walk speed
+    let vx = (Math.random() > 0.5 ? 1 : -1) * (0.6 + Math.random() * 0.8);
     let lastUpdate = 0;
-    const DB_UPDATE_INTERVAL = 200; // ms between DB position writes
+    const DB_UPDATE_INTERVAL = 200;
 
     function walk(now) {
         x += vx;
-        // Bounce off screen edges
         if (x < 20)                       { x = 20;                        vx = Math.abs(vx); }
         if (x > window.innerWidth - 60)   { x = window.innerWidth - 60;    vx = -Math.abs(vx); }
-
-        // Occasionally change direction
         if (Math.random() < 0.003) vx = (Math.random() > 0.5 ? 1 : -1) * (0.6 + Math.random() * 0.8);
-
-        // Update local sprite immediately (smooth)
         updateAvatarSprite(user, x, vx > 0 ? 1 : -1);
-
-        // Write to DB at limited rate (don't flood Firebase)
         if (now - lastUpdate > DB_UPDATE_INTERVAL) {
             lastUpdate = now;
             if (myPresenceRef) myPresenceRef.update({ x: Math.round(x), dir: vx > 0 ? 1 : -1, ts: Date.now() });
         }
-
         avatarRAF = requestAnimationFrame(walk);
     }
     avatarRAF = requestAnimationFrame(walk);
@@ -701,20 +676,14 @@ function listenForAvatars() {
     db.ref('presence').on('value', snapshot => {
         const online = snapshot.val() || {};
         const myUser = localStorage.getItem('activeUser');
-
-        // For OTHER users, update their sprite position from DB
         Object.entries(online).forEach(([user, data]) => {
-            if (user === myUser) return; // we drive our own locally
+            if (user === myUser) return;
             updateAvatarSprite(user, data.x, data.dir || 1);
         });
-
-        // Remove sprites for users who went offline
         document.querySelectorAll('.avatar-sprite').forEach(el => {
             const u = el.dataset.user;
             if (!online[u] && u !== myUser) el.remove();
         });
-
-        // Check proximity for speech bubble
         if (myUser && Object.keys(online).length >= 2) {
             checkAvatarProximity(online, myUser);
         }
@@ -723,7 +692,6 @@ function listenForAvatars() {
 
 function updateAvatarSprite(user, x, dir) {
     const cfg = AVATAR_CONFIG[user] || { emoji: '🙂', color: '#555' };
-
     let el = document.querySelector(`.avatar-sprite[data-user="${user}"]`);
     if (!el) {
         el = document.createElement('div');
@@ -734,26 +702,17 @@ function updateAvatarSprite(user, x, dir) {
             <div class="avatar-label" style="background:${cfg.color};">${user}</div>`;
         document.body.appendChild(el);
     }
-
     el.style.left = x + 'px';
-
     const fig = el.querySelector('.avatar-figure');
-    if (dir < 0) {
-        fig.classList.add('flipped');
-    } else {
-        fig.classList.remove('flipped');
-    }
+    if (dir < 0) { fig.classList.add('flipped'); } else { fig.classList.remove('flipped'); }
 }
 
 function checkAvatarProximity(online, myUser) {
     const myData = online[myUser];
     if (!myData) return;
-
     Object.entries(online).forEach(([user, data]) => {
         if (user === myUser) return;
         const dist = Math.abs((myData.x||0) - (data.x||0));
-
-        // Show bubble if within 80px and enough time has passed
         if (dist < 80 && Date.now() - lastBubbleTime > 5000) {
             lastBubbleTime = Date.now();
             showAvatarBubble(myUser, myData.x, user);
@@ -762,19 +721,16 @@ function checkAvatarProximity(online, myUser) {
 }
 
 function showAvatarBubble(fromUser, x, toUser) {
-    // Remove old bubble
     document.querySelectorAll('.avatar-bubble').forEach(b => b.remove());
     clearTimeout(bubbleTimeout);
-
     const msg = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
     const bubble = document.createElement('div');
     bubble.className = 'avatar-bubble';
     bubble.innerText = msg;
     const bx = Math.max(10, Math.min(x - 30, window.innerWidth - 120));
     bubble.style.left   = bx + 'px';
-    bubble.style.bottom = '68px'; // above avatar
+    bubble.style.bottom = '68px';
     document.body.appendChild(bubble);
-
     bubbleTimeout = setTimeout(() => bubble.remove(), 3000);
 }
 
@@ -787,7 +743,7 @@ function createFlyingHearts(startX, startY) {
     for (let i = 0; i < 130; i++) {
         const p = document.createElement('div');
         p.className = i < 90 ? 'flying-heart' : 'flying-rose';
-        p.innerHTML = i < 90 ? '❤️' : '🌹';
+        p.innerHTML = i < 90 ? '❤️' : i < 110 ? '🌹' : '💞';
         const angle = Math.random()*Math.PI*2, velocity = Math.random()*300+200, duration = 5+Math.random()*3;
         p.style.cssText = `position:fixed;left:${startX}px;top:${startY}px;font-size:${Math.random()*30+20}px;z-index:60000;pointer-events:none;`;
         document.body.appendChild(p);
@@ -818,12 +774,31 @@ function showGlowingText() {
 
 
 // ================================================================
-//  14. NOTIFICATION
+//  14. NOTIFICATION — CHANGED to send to specific user only
 // ================================================================
 function sendNotification() {
-    const user = localStorage.getItem('activeUser') || 'Someone';
-    fetch('https://ntfy.sh/loveos_pager_channel', { method:'POST', body:`❤️ ${user} wants attention! ❤️`, headers:{ 'Title':'LoveOS 98 Alert','Priority':'high' } })
-    .then(r => r.ok ? alert("Page Sent!") : alert("Failed to send."))
+    const sender = localStorage.getItem('activeUser');
+    if (!sender) { alert("Error: User not logged in."); return; }
+
+    // Map sender to recipient's channel
+    const CHANNEL_MAP = {
+        'Venance': 'loveos_rehema_notifications',  // Venance's clicks go to Rehema's phone
+        'Rehema':  'loveos_venance_notifications'  // Rehema's clicks go to Venance's phone
+    };
+
+    const targetChannel = CHANNEL_MAP[sender];
+    if (!targetChannel) { alert("Error: Invalid user."); return; }
+
+    fetch(`https://ntfy.sh/${targetChannel}`, {
+        method: 'POST',
+        body: `❤️ ${sender} wants attention! ❤️`,
+        headers: {
+            'Title': 'LoveOS 98 Alert',
+            'Priority': 'high',
+            'Tags': 'heart,love'
+        }
+    })
+    .then(r => r.ok ? alert(`Notification sent to ${sender === 'Venance' ? 'Rehema' : 'Venance'}!`) : alert("Failed to send."))
     .catch(() => alert("Connection Error."));
 }
 
@@ -837,7 +812,6 @@ function updateClock() {
 
 function openWindow(id) {
     const win = document.getElementById(id); if (!win) return;
-    // If minimized, restore instead
     if (minimizedWindows[id]) { restoreWindow(id); return; }
     win.style.display = 'block';
     bringToFront(win);
