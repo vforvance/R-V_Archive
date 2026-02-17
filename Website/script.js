@@ -291,7 +291,7 @@ function showValentinePrompt() {
         <div class="title-bar"><div class="title-bar-text">❤️ You've Got Mail!</div></div>
         <div class="window-body" style="text-align:center;padding:10px;">
             <div style="font-size:48px;margin:6px 0;">❤️</div>
-            <p style="font-family:'Comic Sans MS',cursive;margin:6px 0 14px;color:#880e4f;">Will you be my Valentine?</p>
+            <p style="font-family:'cursive',cursive;margin:6px 0 14px;color:#880e4f;">Will you be my Valentine?</p>
             <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;">
                 <button id="val-yes" class="valentine-yes">Yes ❤️</button>
                 <button id="val-no"  class="valentine-no">No</button>
@@ -633,8 +633,8 @@ function resetBackground() { db.ref('wallpaper').remove(); }
 //  12. AVATARS — walking sprites, Firebase presence
 // ================================================================
 const AVATAR_CONFIG = {
-    'Venance': { emoji: '🧑', color: '#880e4f' },
-    'Rehema':  { emoji: '👩', color: '#1565c0' }
+    'Venance': { emoji: '👨🏾‍🦱', color: '#880e4f' },
+    'Rehema':  { emoji: '👩🏾‍🦱', color: '#1565c0' }
 };
 
 const GREETINGS = ['Hi! 👋','❤️','Miss you!','😘','Heyy!','💕','Hi bubb!', 'Big Mama, No kids💅🏾'];
